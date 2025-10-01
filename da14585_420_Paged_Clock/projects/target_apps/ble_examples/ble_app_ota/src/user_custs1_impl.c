@@ -381,7 +381,7 @@ void do_display_update_with_analog_clock(void)
     EPD_DrawUTF8(10, 10, 1, date_str, EPD_ASCII_11X16, NULL, BLACK, WHITE);
 
     // 2. 在第 50 行，写时间 (从全局变量读取)
-    EPD_DrawUTF8(10, 50, 1, time_str, EPD_ASCII_11X16, NULL, BLACK, WHITE);
+    EPD_DrawUTF8(10, 50, 1, time_str, EPD_40X80_TABLE, NULL, BLACK, WHITE);
 
     // 3. 在第 260 行，写农历和星期 (从全局变量读取)
     EPD_DrawUTF8(10, 260, 1, lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
