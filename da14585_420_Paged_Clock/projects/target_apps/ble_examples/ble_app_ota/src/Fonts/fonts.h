@@ -96,6 +96,8 @@ extern const uint8_t kunbw[];
 extern const uint8_t kunwr[];
 extern const uint8_t EPD_ASCII_7X12[];
 extern const uint8_t EPD_40X80_TABLE[];
+extern const uint8_t big48X50_font[];
+
 #ifdef __cplusplus
 }
 #endif

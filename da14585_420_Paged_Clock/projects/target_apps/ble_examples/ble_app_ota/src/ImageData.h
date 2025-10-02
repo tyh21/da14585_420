@@ -98,6 +98,7 @@ extern const unsigned char gImage_Work[638];                         //7.jpg
 extern const unsigned char gImage_breakfast[620];                         //1.jpg
 extern const unsigned char gImage_dinner[638];                          //5.jpg
 extern const unsigned char gImage_rest[638];                          //9.jpg
+//extern const uint8_t big48X50_font[];                                 //自定义数组
 
 #endif
 /* FILE END */

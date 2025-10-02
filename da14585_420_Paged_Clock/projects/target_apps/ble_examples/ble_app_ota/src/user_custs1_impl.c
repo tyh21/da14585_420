@@ -381,8 +381,10 @@ void do_display_update_with_analog_clock(void)
     EPD_DrawUTF8(10, 10, 1, date_str, EPD_ASCII_11X16, NULL, BLACK, WHITE);
 
     // 2. 在第 50 行，写时间 (从全局变量读取)
-    EPD_DrawUTF8(10, 50, 1, time_str, EPD_40X80_TABLE, NULL, BLACK, WHITE);
-
+    //EPD_DrawUTF8(10, 50, 1, time_str, EPD_ASCII_11X16, big80X100_font, BLACK, WHITE);
+		// 假设你想在 (X=40, Y=80) 的位置开始绘制时间
+    Paint_DrawBigNumberString(0, 80, time_str, BLACK);
+	
     // 3. 在第 260 行，写农历和星期 (从全局变量读取)
     EPD_DrawUTF8(10, 260, 1, lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
 }
@@ -996,11 +998,97 @@ void user_svc1_led_wr_ind_handler(ke_msg_id_t const msgid,
 /**
  * @brief 修改后的串口命令处理函数，添加模拟时钟模式切换
  */
+//void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
+//                              struct custs1_val_write_ind const *param,
+//                              ke_task_id_t const dest_id,
+//                              ke_task_id_t const src_id)
+//{
+//    arch_printf("cmd HEX %d:", param->length);
+//    for (int i = 0; i < param->length; i++)
+//    {
+//        arch_printf("%02X", param->value[i]);
+//    }
+//    arch_printf("\r\n");
+//    
+//    if ((param->value[0] == 0xDD) && (param->length >= 5))
+//    {
+//        // 时间设置逻辑保持不变
+//        current_unix_time = (param->value[1] << 24) + (param->value[2] << 16) + (param->value[3] << 8) + (param->value[4] & 0xff);
+//        tm_t tm = {0};
+//        transformTime(current_unix_time, &tm);
+//        app_easy_timer_cancel(timer_used_min);
+//        time_offset = 60 - tm.tm_sec;
+//        timer_used_min = app_easy_timer(time_offset * 100, do_min_work_with_analog_clock);
+//        
+//        // 重置更新时间，强制重绘
+//        last_update_time = 0;
+//        
+//        arch_printf("%d-%02d-%02d %02d:%02d:%02d %d\n", tm.tm_year + YEAR0,
+//                    tm.tm_mon + 1,
+//                    tm.tm_mday,
+//                    tm.tm_hour,
+//                    tm.tm_min,
+//                    tm.tm_sec,
+//                    tm.tm_wday);
+//    }
+//    else if (param->value[0] == 0xAA)
+//    {
+//        platform_reset(RESET_NO_ERROR);
+//    }
+//    else if (param->value[0] == 0xAB)
+//    {
+//        // do_img_save();
+//    }
+//    else if (param->value[0] == 0xE2)
+//    {
+//        // 刷新当前显示模式
+//        last_update_time = 0; // 强制重绘
+//        do_display_update_with_analog_clock();
+//        is_part = 0;
+//        step = 1;
+//        display();
+//    }
+//    else if (param->value[0] == 0xE3)
+//    {
+//        // 切换到时间显示模式
+//        current_display_mode = DISPLAY_MODE_TIME;
+//        last_update_time = 0; // 强制重绘
+//        do_display_update_with_analog_clock();
+//        is_part = 0;
+//        step = 1;
+//        display();
+//        arch_printf("Switched to TIME display mode\n");
+//    }
+//    else if (param->value[0] == 0xE4)
+//    {
+//        // 切换到日历显示模式（数字时钟）
+//        current_display_mode = DISPLAY_MODE_CALENDAR;
+//        last_update_time = 0; // 强制重绘
+//        do_display_update_with_analog_clock();
+//        is_part = 0;
+//        step = 1;
+//        display();
+//        arch_printf("Switched to CALENDAR display mode\n");
+//    }
+//    else if (param->value[0] == 0xE5)
+//    {
+//        // 新增：切换到日历显示模式（模拟时钟）
+//        current_display_mode = DISPLAY_MODE_CALENDAR_ANALOG;
+//        last_update_time = 0; // 强制重绘
+//        do_display_update_with_analog_clock();
+//        is_part = 0;
+//        step = 1;
+//        display();
+//        arch_printf("Switched to CALENDAR ANALOG display mode\n");
+//    }
+//}
+
 void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
                               struct custs1_val_write_ind const *param,
                               ke_task_id_t const dest_id,
                               ke_task_id_t const src_id)
 {
+    // 打印接收到的命令 (保持不变)
     arch_printf("cmd HEX %d:", param->length);
     for (int i = 0; i < param->length; i++)
     {
@@ -1008,27 +1096,35 @@ void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
     }
     arch_printf("\r\n");
     
+    // 【核心】检查 if-else if 结构
     if ((param->value[0] == 0xDD) && (param->length >= 5))
     {
-        // 时间设置逻辑保持不变
+        // --- 0xDD 时间同步指令的处理逻辑 ---
+        
+        // 1. 更新时间戳
         current_unix_time = (param->value[1] << 24) + (param->value[2] << 16) + (param->value[3] << 8) + (param->value[4] & 0xff);
-        tm_t tm = {0};
-        transformTime(current_unix_time, &tm);
+        
+        // 2. 立即用新时间戳计算所有需要显示的字符串
+        transformTime(current_unix_time, &g_tm);
+        struct Lunar_Date lunar_date;
+        LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
+        sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
+        sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
+        sprintf(lunar_str, "%s%s  星期%s", Lunar_MonthString[lunar_date.Month], Lunar_DateString[lunar_date.Date], WEEKCN[g_tm.tm_wday]);
+        
+        // 3. 立即触发一次显示
+        if (step == 0) {
+            step = 1;
+            display();
+        }
+
+        // 4. 最后，精确地设置下一次的定时器
         app_easy_timer_cancel(timer_used_min);
-        time_offset = 60 - tm.tm_sec;
+        time_offset = 60 - g_tm.tm_sec;
         timer_used_min = app_easy_timer(time_offset * 100, do_min_work_with_analog_clock);
-        
-        // 重置更新时间，强制重绘
-        last_update_time = 0;
-        
-        arch_printf("%d-%02d-%02d %02d:%02d:%02d %d\n", tm.tm_year + YEAR0,
-                    tm.tm_mon + 1,
-                    tm.tm_mday,
-                    tm.tm_hour,
-                    tm.tm_min,
-                    tm.tm_sec,
-                    tm.tm_wday);
-    }
+
+    } // <--- 这是 if (0xDD) 的结束括号，确保它在这里
+    
     else if (param->value[0] == 0xAA)
     {
         platform_reset(RESET_NO_ERROR);
@@ -1079,7 +1175,8 @@ void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
         display();
         arch_printf("Switched to CALENDAR ANALOG display mode\n");
     }
-}
+
+} // <--- 这是整个函数的结束括号，确保它在最后
 
 
 void user_svc1_long_val_cfg_ind_handler(ke_msg_id_t const msgid,

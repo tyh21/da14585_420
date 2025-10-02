@@ -216,6 +216,7 @@ void Paint_DrawTime(UWORD Xstart, UWORD Ystart, PAINT_TIME *pTime, sFONT* Font, 
 void Paint_DrawBitMap(const unsigned char* image_buffer);
 void Paint_DrawImage(const unsigned char *image_buffer, UWORD xStart, UWORD yStart, UWORD W_Image, UWORD H_Image,UWORD Color_Foreground, UWORD Color_Background);
 void EPD_DrawUTF8(uint16_t x, uint16_t y, uint8_t gap, const char *str, const uint8_t *ascii_font, const uint8_t *utf8_font,UWORD Color_Foreground, UWORD Color_Background);
+void Paint_DrawBigNumberString(UWORD Xstart, UWORD Ystart, const char *pString, UWORD Color);
 #endif
 
 
