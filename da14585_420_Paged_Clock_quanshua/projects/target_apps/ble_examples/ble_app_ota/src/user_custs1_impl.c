@@ -157,7 +157,7 @@ const UWORD img_w = 70;  // 图片宽度
 const UWORD img_h = 70;  // 图片高度
 Paint_NewImage(EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
 //            Paint_SelectImage(epd_buffer);
-            Paint_SetMirroring(MIRROR_VERTICAL);
+            //Paint_SetMirroring(MIRROR_VERTICAL);
             Paint_Clear(WHITE);
             
             sprintf(buf, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);                   //年月日
@@ -225,7 +225,7 @@ void do_time_show_diff_part(void)
     char min_buf[3]; 
     // 重新选择图像缓冲区，但不需要重新初始化或清空整个缓冲区 
 //    Paint_SelectImage(epd_buffer); 
-    Paint_SetMirroring(MIRROR_VERTICAL); 
+    //Paint_SetMirroring(MIRROR_VERTICAL); 
 
     // 根据小时数的位数，确定分钟数字的起始X坐标
     UWORD min_x_start;
@@ -810,7 +810,7 @@ void display(void)
 
                 // 2. 初始化 Paint 库
                 Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
-                Paint_SetMirroring(MIRROR_VERTICAL);
+                //Paint_SetMirroring(MIRROR_VERTICAL);
 
                 // 3. 清空当前页的缓冲区
                 Paint_Clear(WHITE);
@@ -837,31 +837,57 @@ void display(void)
             step++;
             // 直接进入下一步
 
-        case 5: // 循环渲染并发送每一页 (for OLD image)
-            // 【重要】这里的逻辑必须与 case 3 完全镜像
-            if (page_to_render < NUM_PAGES) {
-                current_page_y_start = page_to_render * PAGE_HEIGHT;
+//        case 5: // 循环渲染并发送每一页 (for OLD image)
+//            // 【重要】这里的逻辑必须与 case 3 完全镜像
+//            if (page_to_render < NUM_PAGES) {
+//                current_page_y_start = page_to_render * PAGE_HEIGHT;
 
-                int current_page_actual_height = PAGE_HEIGHT;
-                if (current_page_y_start + PAGE_HEIGHT > LOGIC_HEIGHT) {
-                    current_page_actual_height = LOGIC_HEIGHT - current_page_y_start;
-                }
+//                int current_page_actual_height = PAGE_HEIGHT;
+//                if (current_page_y_start + PAGE_HEIGHT > LOGIC_HEIGHT) {
+//                    current_page_actual_height = LOGIC_HEIGHT - current_page_y_start;
+//                }
 
-                Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
-                Paint_SetMirroring(MIRROR_VERTICAL);
-                Paint_Clear(WHITE);
-                
-                do_display_update_with_analog_clock();
+//                Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
+//                Paint_SetMirroring(MIRROR_VERTICAL);
+//                Paint_Clear(WHITE);
+//                
+//                do_display_update_with_analog_clock();
 
-                uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
-                for (int i = 0; i < size_to_send; i++) {
-                    EPD_2IN13_V2_SendData(page_buffer[i]);
-                }
-                page_to_render++;
-            } else {
-                step++;
-            }
-            break;
+//                uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
+//                for (int i = 0; i < size_to_send; i++) {
+//                    EPD_2IN13_V2_SendData(page_buffer[i]);
+//                }
+//                page_to_render++;
+//            } else {
+//                step++;
+//            }
+//            break;
+
+case 5: // 【已修正】循环发送“空白”数据到红色通道
+    if (page_to_render < NUM_PAGES) {
+        
+        // 1. 【关键修正】计算当前页需要发送的字节数 (这个逻辑来自您旧的 case 3)
+        // 我们需要确保 current_page_buffer_size 在这里被正确赋值。
+        int current_page_actual_height = PAGE_HEIGHT;
+        if (page_to_render * PAGE_HEIGHT + PAGE_HEIGHT > LOGIC_HEIGHT) {
+            current_page_actual_height = LOGIC_HEIGHT - (page_to_render * PAGE_HEIGHT);
+        }
+        // 将计算出的正确大小，赋值给全局变量
+        current_page_buffer_size = (LOGIC_WIDTH * current_page_actual_height) / 8;
+
+        // 2. 【关键修正】使用这个正确的、动态的大小来清空缓冲区
+        memset(page_buffer, 0x00, current_page_buffer_size);
+
+        // 3. 发送这个空白的缓冲区
+        for (int i = 0; i < current_page_buffer_size; i++) {
+            EPD_2IN13_V2_SendData(page_buffer[i]);
+        }
+
+        page_to_render++; // 准备发送下一页的空白数据
+    } else {
+        step++; // 所有空白数据都发送完毕，进入下一步
+    }
+    break;
 
         case 6: // 触发屏幕刷新
             EPD_2IN13_V2_TurnOnDisplay();
