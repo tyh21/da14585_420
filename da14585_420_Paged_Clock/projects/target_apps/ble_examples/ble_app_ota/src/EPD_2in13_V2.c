@@ -2,6 +2,43 @@
 #include "EPD_2in13_V2.h"
 #include "Debug.h"
 
+const unsigned char EPD_2IN13_V2_lut_full_update[] = {
+        0x80, 0x60, 0x40, 0x00, 0x00, 0x00, 0x00,             //LUT0: BB:     VS 0 ~7
+        0x10, 0x60, 0x20, 0x00, 0x00, 0x00, 0x00,             //LUT1: BW:     VS 0 ~7
+        0x80, 0x60, 0x40, 0x00, 0x00, 0x00, 0x00,             //LUT2: WB:     VS 0 ~7
+        0x10, 0x60, 0x20, 0x00, 0x00, 0x00, 0x00,             //LUT3: WW:     VS 0 ~7
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             //LUT4: VCOM:   VS 0 ~7
+
+        0x03, 0x03, 0x00, 0x00, 0x02,                       // TP0 A~D RP0
+        0x09, 0x09, 0x00, 0x00, 0x02,                       // TP1 A~D RP1
+        0x03, 0x03, 0x00, 0x00, 0x02,                       // TP2 A~D RP2
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP3 A~D RP3
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP4 A~D RP4
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP5 A~D RP5
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP6 A~D RP6
+
+        0x15, 0x41, 0xA8, 0x32, 0x30, 0x0A,
+};
+
+const unsigned char EPD_2IN13_V2_lut_partial_update[] = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             //LUT0: BB:     VS 0 ~7
+        0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             //LUT1: BW:     VS 0 ~7
+        0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             //LUT2: WB:     VS 0 ~7
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             //LUT3: WW:     VS 0 ~7
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             //LUT4: VCOM:   VS 0 ~7
+
+        0x0A, 0x00, 0x00, 0x00, 0x00,                       // TP0 A~D RP0
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP1 A~D RP1
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP2 A~D RP2
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP3 A~D RP3
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP4 A~D RP4
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP5 A~D RP5
+        0x00, 0x00, 0x00, 0x00, 0x00,                       // TP6 A~D RP6
+
+        0x15, 0x41, 0xA8, 0x32, 0x30, 0x0A,
+};
+
+
 void EPD_GPIO_init(void){
     //EPD_VCC ENABLE
     GPIO_ConfigurePin(GPIO_PORT_2, GPIO_PIN_3, OUTPUT, PID_GPIO, true);
@@ -96,7 +133,8 @@ void EPD_2IN13_V2_ReadBusy(void)
         // 调用我们找到的看门狗重载函数，使用最常用的参数。
         // 这行代码会告诉看门狗：“程序没有死，只是在等一个慢速设备，请不要复位！”
         wdg_reload(WATCHDOG_DEFAULT_PERIOD);
-				DEV_Delay_ms(500);
+				//arch_ble_force_wakeup();
+				DEV_Delay_ms(100);
     }
     Debug("e-Paper busy release, wait finished.\r\n");
 }
@@ -478,4 +516,86 @@ void EPD_2IN13_V2_Sleep(void)
     EPD_2IN13_V2_SendData(0x01);
     // DEV_Delay_ms(100);
 }
+void EPD_Init_Pure_Weixue_Sequence(void)
+{
+    // 使用我们自己的 Reset 和 ReadBusy
+    EPD_2IN13_V2_Reset();
+    EPD_2IN13_V2_ReadBusy();
+    
+    // 使用我们自己的 SendCommand
+    EPD_2IN13_V2_SendCommand(0x12); // soft reset
+    EPD_2IN13_V2_ReadBusy();
 
+    EPD_2IN13_V2_SendCommand(0x21); // Display update control
+    EPD_2IN13_V2_SendData(0x40);
+    EPD_2IN13_V2_SendData(0x00);
+
+    EPD_2IN13_V2_SendCommand(0x3C); // BorderWavefrom
+    EPD_2IN13_V2_SendData(0x05);
+
+    EPD_2IN13_V2_SendCommand(0x11); // data entry mode
+    EPD_2IN13_V2_SendData(0x03);
+
+    // =======================================================================
+    // !! 使用我们之前已经费尽心力调试好的、100%正确的RAM地址设置 !!
+    // =======================================================================
+    // Set RAM X-address Start/End position (0 to 399)
+    EPD_2IN13_V2_SendCommand(0x44);
+    EPD_2IN13_V2_SendData(0);           // X-start = 0
+    EPD_2IN13_V2_SendData(49);          // X-end = 49 (399 / 8)
+
+    // Set RAM Y-address Start/End position (0 to 299)
+    EPD_2IN13_V2_SendCommand(0x45);
+    EPD_2IN13_V2_SendData(0);           // Y-start low = 0
+    EPD_2IN13_V2_SendData(0);           // Y-start high = 0
+    EPD_2IN13_V2_SendData(299 % 256);   // Y-end low = 43
+    EPD_2IN13_V2_SendData(299 / 256);   // Y-end high = 1
+
+    // Set RAM X address counter to 0
+    EPD_2IN13_V2_SendCommand(0x4E);
+    EPD_2IN13_V2_SendData(0);
+
+    // Set RAM Y address counter to 0
+    EPD_2IN13_V2_SendCommand(0x4F);
+    EPD_2IN13_V2_SendData(0);
+    EPD_2IN13_V2_SendData(0);
+    
+    EPD_2IN13_V2_ReadBusy();
+}
+
+void EPD_2IN13_V2_Init_Partial_Mode_Legacy(void)
+{
+    // 我们不需要完整的 Reset 和 Init，只需要切换模式的关键指令
+
+    // 1. 设置VCOM电压 (来自旧驱动)
+    EPD_2IN13_V2_SendCommand(0x2C);
+    EPD_2IN13_V2_SendData(0x28); // 使用旧驱动中的值
+
+    EPD_2IN13_V2_ReadBusy();
+
+    // 2. 【核心】加载局刷LUT (来自旧驱动)
+    // 注意：这里的 EPD_2IN13_V2_lut_partial_update 数组必须存在于您的项目中！
+    EPD_2IN13_V2_SendCommand(0x32);
+    for (int count = 0; count < 70; count++)
+    {
+        EPD_2IN13_V2_SendData(EPD_2IN13_V2_lut_partial_update[count]);
+    }
+
+    // 3. 发送神秘的 0x37 指令序列 (来自旧驱动)
+    EPD_2IN13_V2_SendCommand(0x37);
+    EPD_2IN13_V2_SendData(0x00);
+    EPD_2IN13_V2_SendData(0x00);
+    EPD_2IN13_V2_SendData(0x00);
+    EPD_2IN13_V2_SendData(0x00);
+    EPD_2IN13_V2_SendData(0x40);
+    EPD_2IN13_V2_SendData(0x00);
+    EPD_2IN13_V2_SendData(0x00);
+}
+
+void EPD_2IN13_V2_TurnOnDisplay_Partial_Legacy(void)
+{
+    EPD_2IN13_V2_SendCommand(0x22);
+    EPD_2IN13_V2_SendData(0xC0); // <-- 使用旧驱动的参数
+    EPD_2IN13_V2_SendCommand(0x20);
+    EPD_2IN13_V2_ReadBusy();
+}

@@ -68,4 +68,7 @@ void EPD_DrawImage( const uint8_t *image, uint16_t x, uint16_t y, uint16_t w, ui
 void EPD_SetWindow(uint16_t x, uint8_t y_x8, uint16_t x_size, uint8_t y_size_x8);
 void EPD_2IN13_V2_SendCommand(UBYTE Reg);
 void EPD_2IN13_V2_SendData(UBYTE Data);
+void EPD_Init_Pure_Weixue_Sequence(void);
+void EPD_2IN13_V2_Init_Partial_Mode_Legacy(void);           //这个函数应该不起作用
+void EPD_2IN13_V2_TurnOnDisplay_Partial_Legacy(void);       //这个函数应该不起作用
 #endif

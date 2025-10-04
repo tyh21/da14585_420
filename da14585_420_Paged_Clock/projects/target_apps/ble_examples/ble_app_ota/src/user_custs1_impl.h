@@ -58,6 +58,10 @@ enum
 		return;                    \
 	}
 extern uint8_t isconnected ;
+extern int minute_counter;
+extern bool is_display_busy;
+extern bool is_date_changed;
+
 /*
  * FUNCTION DECLARATIONS
  ****************************************************************************************

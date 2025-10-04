@@ -107,7 +107,7 @@
                 await epdCharacteristic.startNotifications();
                 epdCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
                     const count = parseInt('0x' + bytesToHex(event.target.value.buffer));
-                    log(`> [来自屏幕]: 收到${count} byte数据`);
+                    log(`> [来自屏幕]: 屏幕刷新完成`);
                 });
                 log("> EPD服务已就绪。");
 

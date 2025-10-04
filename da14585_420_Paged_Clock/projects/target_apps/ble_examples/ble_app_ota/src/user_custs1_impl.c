@@ -65,6 +65,10 @@ typedef enum {
     DISPLAY_MODE_CALENDAR_ANALOG = 2 // 日历显示模式（模拟时钟）
 } display_mode_t;
 
+int minute_counter = 0;
+bool is_display_busy = false;
+bool is_date_changed = true; 
+
 // 添加全局变量来跟踪上次更新时间（用于判断是否需要强制重绘）
 static uint32_t last_update_time __SECTION_ZERO("retention_mem_area0");
 static uint8_t last_minute __SECTION_ZERO("retention_mem_area0");
@@ -111,7 +115,59 @@ uint8_t dev_id __SECTION_ZERO("retention_mem_area0");
 char date_str[20];
 char time_str[10];
 char lunar_str[30];
+
+char old_date_str[20];
+char old_time_str[10];
+char old_lunar_str[30];
+
+char date_str_CN[50];
 // ================================================================
+
+// ================== 中文日期转换模块 ==================
+
+// 1. 中文数字的“查找表” (字符串数组)
+const char* chinese_digits[] = {"〇", "一", "二", "三", "四", "五", "六", "七", "八", "九"};
+const char* chinese_tens[] = {"", "十", "二十", "三十"}; // 用于月份和日期的十位
+
+/**
+ * @brief 将一个整数年份转换为中文大写字符串
+ * @param year  要转换的年份 (例如 2025)
+ * @param dest  用于存储结果的字符串缓冲区
+ */
+void year_to_chinese(int year, char* dest) {
+    dest[0] = '\0'; // 清空目标字符串
+    
+    // 逐位转换
+    strcat(dest, chinese_digits[year / 1000 % 10]);
+    strcat(dest, chinese_digits[year / 100 % 10]);
+    strcat(dest, chinese_digits[year / 10 % 10]);
+    strcat(dest, chinese_digits[year % 10]);
+}
+
+/**
+ * @brief 将月或日转换为中文大写字符串
+ * @param num   要转换的数字 (例如 10)
+ * @param dest  用于存储结果的字符串缓冲区
+ */
+void num_to_chinese(int num, char* dest) {
+    dest[0] = '\0'; // 清空目标字符串
+
+    if (num < 10) {
+        strcat(dest, chinese_digits[num]);
+    } else if (num == 10) {
+        strcat(dest, "十");
+    } else if (num < 20) {
+        strcat(dest, "十");
+        strcat(dest, chinese_digits[num % 10]);
+    } else { // 20 到 31
+        strcat(dest, chinese_tens[num / 10]);
+        if (num % 10 != 0) {
+            strcat(dest, chinese_digits[num % 10]);
+        }
+    }
+}
+
+// ======================================================
 
 static void spi_flash_peripheral_init(void)
 {
@@ -343,34 +399,6 @@ void do_time_show_diff_part(void)
 //    step = 0;
 //}
 
-//void do_display_update_with_analog_clock(void)
-//{
-//    // 1. 获取时间
-//    transformTime(current_unix_time, &g_tm);
-
-//    // 2. 准备要显示的字符串
-//    char date_str[20];
-//    char time_str[10];
-//    char lunar_str[30];
-
-//    sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-//    sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
-//    
-//    // (我们暂时不处理复杂的农历和星期，只显示一个占位符)
-//    sprintf(lunar_str, "LUNAR & WEEKDAY");
-
-//    // 3. 【核心】在指定位置，绘制这些字符串
-//    //    Paint_SetPixel 会自动处理分页，我们只管调用即可
-//    
-//    // 在第 10 行，绘制公历日期
-//    EPD_DrawUTF8(10, 10, 0, date_str, &Font12, NULL, BLACK, WHITE);
-
-//    // 在第 50 行，绘制时间
-//    EPD_DrawUTF8(10, 50, 0, time_str, &Font24, NULL, BLACK, WHITE);
-
-//    // 在第 260 行，绘制农历和星期
-//    EPD_DrawUTF8(10, 260, 0, lunar_str, &Font12, NULL, BLACK, WHITE);
-//}
 
 void do_display_update_with_analog_clock(void)
 {
@@ -378,15 +406,26 @@ void do_display_update_with_analog_clock(void)
     // 这个函数现在不进行任何计算，只负责绘图
 
     // 1. 在第 10 行，写公历日期 (从全局变量读取)
-    EPD_DrawUTF8(10, 10, 1, date_str, EPD_ASCII_11X16, NULL, BLACK, WHITE);
+		//arch_ble_force_wakeup();
+    EPD_DrawUTF8(10, 10, 1, date_str_CN, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
 
     // 2. 在第 50 行，写时间 (从全局变量读取)
     //EPD_DrawUTF8(10, 50, 1, time_str, EPD_ASCII_11X16, big80X100_font, BLACK, WHITE);
 		// 假设你想在 (X=40, Y=80) 的位置开始绘制时间
+		//arch_ble_force_wakeup();
     Paint_DrawBigNumberString(0, 80, time_str, BLACK);
 	
     // 3. 在第 260 行，写农历和星期 (从全局变量读取)
+		//arch_ble_force_wakeup();
     EPD_DrawUTF8(10, 260, 1, lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
+}
+
+void do_old_display_update_with_analog_clock(void)
+{
+     //这个函数使用备份的、上一分钟的字符串
+    //EPD_DrawUTF8(10, 10, 1, date_str_CN, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
+    Paint_DrawBigNumberString(0, 80, old_time_str, BLACK);
+    EPD_DrawUTF8(10, 260, 1, old_lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
 }
 
 
@@ -448,25 +487,53 @@ void do_img_save(void)
 
 void do_min_work_with_analog_clock(void)
 {
-    // 1. 设置下一次的 60 秒定时器
-    timer_used_min = app_easy_timer(APP_PERIPHERAL_CTRL_TIMER_DELAY_MINUTES, do_min_work_with_analog_clock);
-    
-    // 2. 更新当前的 Unix 时间戳
-    current_unix_time += time_offset;
+    timer_used_min = app_easy_timer(APP_PERIPHERAL_CTRL_TIMER_DELAY_MINUTES, do_min_work_with_analog_clock);    // 1. 设置下一次的 60 秒定时器
+    current_unix_time += time_offset;                           //更新当前的 Unix 时间戳
     time_offset = 60;
-
-    // ================== 【核心修改】在这里进行所有计算 ==================
-    
     // a. 计算 tm_t 结构体
     transformTime(current_unix_time, &g_tm);
 
-    // b. 计算农历结构体
+//    // b. 计算农历结构体
+//    struct Lunar_Date lunar_date;
+//    LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
+
+//    // c. 格式化所有需要显示的字符串，并存入全局变量
+//    sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
+//    sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
+//    sprintf(lunar_str, "%s%s  星期%s", 
+//            Lunar_MonthString[lunar_date.Month], 
+//            Lunar_DateString[lunar_date.Date],
+//            WEEKCN[g_tm.tm_wday]);
+//    // ====================================================================
+
+//    // 4. 如果当前没有正在进行的显示任务，就启动一次新的显示
+//    if (step == 0)
+//    {
+//        step = 1;
+//        display();
+//    }
+//}
+    // ================== 【核心修改】使用中文转换 ==================
+    
+    // a. 定义临时的中文字符串缓冲区
+    char chinese_year[20];
+    char chinese_month[10];
+    char chinese_day[10];
+
+    // b. 调用转换函数
+    year_to_chinese(g_tm.tm_year + YEAR0, chinese_year);
+    num_to_chinese(g_tm.tm_mon + 1, chinese_month);
+    num_to_chinese(g_tm.tm_mday, chinese_day);
+
+    // c. 格式化最终的全局日期字符串
+		sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
+    sprintf(date_str_CN, "%s年%s月%s日", chinese_year, chinese_month, chinese_day);
+
+    // (时间和农历的计算保持不变)
+    sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
+    
     struct Lunar_Date lunar_date;
     LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-
-    // c. 格式化所有需要显示的字符串，并存入全局变量
-    sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-    sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
     sprintf(lunar_str, "%s%s  星期%s", 
             Lunar_MonthString[lunar_date.Month], 
             Lunar_DateString[lunar_date.Date],
@@ -481,6 +548,36 @@ void do_min_work_with_analog_clock(void)
     }
 }
 
+void update_all_display_strings(void)
+{
+    // =================================================================
+    // !! 定义、计算、格式化，所有操作都在这个函数内部完成 !!
+    // =================================================================
+    transformTime(current_unix_time, &g_tm);
+			if (g_tm.tm_hour == 0 && g_tm.tm_min == 0) {
+        is_date_changed = true; // 新的一天开始了，把“脏位”标记为 true
+			}
+			if (is_date_changed) 
+    {
+    struct Lunar_Date lunar_date;
+    LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
+
+    // b. 准备中文日期
+    char chinese_year[20],chinese_month[10],chinese_day[10];
+    // c. 【填充局部变量】调用转换函数
+    year_to_chinese(g_tm.tm_year + YEAR0, chinese_year);
+    num_to_chinese(g_tm.tm_mon + 1, chinese_month);
+    num_to_chinese(g_tm.tm_mday, chinese_day);
+		sprintf(date_str_CN, "%s年%s月%s日", chinese_year, chinese_month, chinese_day);
+
+    // d. 【使用局部变量】将计算结果格式化到“全局”的显示缓冲区中
+    //sprintf(date_str_CN, "%s年%s月%s日", chinese_year, chinese_month, chinese_day);
+    //sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
+    sprintf(lunar_str, "%s%s  星期%s", Lunar_MonthString[lunar_date.Month], Lunar_DateString[lunar_date.Date],WEEKCN[g_tm.tm_wday]);
+			is_date_changed = false; 
+			}
+		sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
+}
 
 void my_app_on_db_init_complete(void)
 {
@@ -618,149 +715,6 @@ extern uint8_t page_buffer[];
 extern int current_page_y_start;
 extern uint32_t current_page_buffer_size;
 
-//void display(void)
-//{
-//    // 定义屏幕的逻辑尺寸和分页参数
-//    #define LOGIC_WIDTH       EPD_2IN13_V2_WIDTH   // 400
-//    #define LOGIC_HEIGHT      EPD_2IN13_V2_HEIGHT  // 300
-//    #define PAGE_HEIGHT       32                   // 内存安全的分页高度
-//    #define NUM_PAGES         (LOGIC_HEIGHT / PAGE_HEIGHT)
-
-//    // 状态机变量
-//    static int page_to_render = 0;
-//    bool is_busy = true;
-//    
-//    // 从您的旧函数中保留的变量
-//    uint8_t out_buffer[2];
-//    uint32_t delay = APP_PERIPHERAL_CTRL_TIMER_DELAY;
-
-//    switch (step)
-//    {
-//        case 0: 
-//            is_busy = false; 
-//            break;
-
-//        case 1: // 初始化
-//            arch_printf("Step 1: Init\n");
-//            EPD_GPIO_init();
-//            EPD_2IN13_V2_Init(0); // 使用全屏刷新模式初始化
-//            page_to_render = 0;
-//            step++;
-//            // 直接进入下一步，不等待
-//        
-//        case 2: // 准备发送新图像数据 (命令 0x24)
-//            arch_printf("Step 2: Prepare for NEW image (0x24)\n");
-//            EPD_2IN13_V2_SendCommand(0x24);
-//            step++;
-//            // 直接进入下一步
-
-//        case 3: // 循环渲染并发送每一页 (for NEW image)
-//            if (page_to_render < NUM_PAGES) {
-//                arch_printf(" > Rendering page %d for NEW image\n", page_to_render);
-
-//                // 1. 告诉 Paint 库当前要画哪一页
-//                current_page_y_start = page_to_render * PAGE_HEIGHT;
-
-//                // 2. 初始化 Paint 库 (使用正确的400x300逻辑尺寸)
-//                Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
-
-//                // 3. 【核心】使用从原始项目中验证过的修正方法
-////                Paint_SetMirroring(MIRROR_VERTICAL | MIRROR_HORIZONTAL);
-//								Paint_SetMirroring(MIRROR_VERTICAL);
-
-//                // 4. 清空当前页的缓冲区 (Paint库只会清空 page_buffer)
-//                Paint_Clear(WHITE);
-
-//                // 5. 【绘图区】在这里，您可以像在普通屏幕上一样自由绘图
-//                //    所有坐标都以 (0,0) 为左上角
-//                Paint_DrawRectangle(0, 0, 20, 50, BLACK, DOT_PIXEL_DFT, DRAW_FILL_FULL);
-//                EPD_DrawUTF8(30, 20, 1, "Hello, Manus!", EPD_ASCII_11X16, NULL, BLACK, FONT_BACKGROUND);
-//                // Paint_DrawLine(0, 0, 399, 299, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID); // 测试对角线
-
-//                // 6. 发送刚刚在 page_buffer 中生成好的、已修正的数据
-//                for (int i = 0; i < current_page_buffer_size; i++) {
-//                    EPD_2IN13_V2_SendData(page_buffer[i]);
-//                }
-
-//                page_to_render++; // 准备渲染下一页
-//                is_busy = true;   // 保持定时器运行
-//            } else {
-//                // 所有页都已发送完毕
-//                page_to_render = 0; // 重置页码计数器，为发送 OLD 图像做准备
-//                step++;
-//            }
-//            break;
-
-//        case 4: // 准备发送旧图像数据 (命令 0x26)
-//            arch_printf("Step 4: Prepare for OLD image (0x26)\n");
-//            EPD_2IN13_V2_SendCommand(0x26);
-//            step++;
-//            // 直接进入下一步
-
-//        case 5: // 循环渲染并发送每一页 (for OLD image)
-//            // 注意：这里的逻辑与 case 3 完全相同。
-//            // 这是为了确保新旧数据一致，以获得最佳刷新效果。
-//            if (page_to_render < NUM_PAGES) {
-//                arch_printf(" > Rendering page %d for OLD image\n", page_to_render);
-//                current_page_y_start = page_to_render * PAGE_HEIGHT;
-//                Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
-//                Paint_SetMirroring(MIRROR_VERTICAL | MIRROR_HORIZONTAL);
-//                Paint_Clear(WHITE);
-//                
-//                // 【绘图区】这里的绘图逻辑必须与 case 3 完全一致
-//                Paint_DrawRectangle(0, 0, 20, 50, BLACK, DOT_PIXEL_DFT, DRAW_FILL_FULL);
-//                EPD_DrawUTF8(30, 20, 1, "Hello, Manus!", EPD_ASCII_11X16, NULL, BLACK, FONT_BACKGROUND);
-//                // Paint_DrawLine(0, 0, 399, 299, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID);
-
-//                for (int i = 0; i < current_page_buffer_size; i++) {
-//                    EPD_2IN13_V2_SendData(page_buffer[i]);
-//                }
-//                page_to_render++;
-//                is_busy = true;
-//            } else {
-//                step++;
-//            }
-//            break;
-
-//        case 6: // 触发屏幕刷新
-//            arch_printf("Step 6: Turn On Display\n");
-//            EPD_2IN13_V2_TurnOnDisplay();
-//            step++;
-//            break;
-
-//        case 7: // 等待刷新完成
-//            if (EPD_BUSY == 0) {
-//                step++;
-//            }
-//            break;
-
-//        case 8: // 进入休眠
-//            arch_printf("Step 8: Sleep\n");
-//            EPD_2IN13_V2_Sleep();
-//            
-//            // 从您的旧代码中保留的蓝牙通知逻辑
-//            out_buffer[0] = 0xff;
-//            out_buffer[1] = 0xff;
-//            bls_att_pushNotifyData(SVC1_IDX_LED_STATE_VAL, out_buffer, 2);
-//            
-//            step = 0; // 复位状态机，等待下一次触发
-//            is_busy = false;
-//            break;
-
-//        default:
-//            step = 0;
-//            is_busy = false;
-//            break;
-//    }
-
-//    if (is_busy) {
-//        app_easy_timer(delay, display);
-//    } else {
-//        // 如果您的项目中有 timer_used 这个变量，就取消注释
-//        // app_easy_timer_cancel(timer_used);
-//    }
-//}
-
 void display(void)
 {
     // 定义屏幕的逻辑尺寸和分页参数
@@ -778,6 +732,9 @@ void display(void)
     // 从您的旧函数中保留的变量
     uint8_t out_buffer[2];
     uint32_t delay = APP_PERIPHERAL_CTRL_TIMER_DELAY;
+	
+//		bool is_full_update = (minute_counter == 0) || (minute_counter % 10 == 0);
+//		static bool partial_mode_initialized = false;
 
     switch (step)
     {
@@ -786,11 +743,10 @@ void display(void)
             break;
 
         case 1: // 初始化
-            EPD_GPIO_init();
-            EPD_2IN13_V2_Init(0);
-            page_to_render = 0;
-            step++;
-            // 直接进入下一步
+            EPD_Init_Pure_Weixue_Sequence();     //微雪驱动，可以飞刷
+						page_to_render = 0;
+						step++;
+						break; // 这里需要 break，不能直接进入下一步
         
         case 2: // 准备发送新图像数据 (命令 0x24)
             EPD_2IN13_V2_SendCommand(0x24);
@@ -807,92 +763,72 @@ void display(void)
                 if (current_page_y_start + PAGE_HEIGHT > LOGIC_HEIGHT) {
                     current_page_actual_height = LOGIC_HEIGHT - current_page_y_start; // 最后一页的高度
                 }
-
                 // 2. 初始化 Paint 库
                 Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
-                //Paint_SetMirroring(MIRROR_VERTICAL);
-
                 // 3. 清空当前页的缓冲区
                 Paint_Clear(WHITE);
-
                 // 4. 【绘图区】调用上层绘图逻辑
                 do_display_update_with_analog_clock(); // <--- 我们把绘图逻辑放回这里
-
                 // 5. 发送数据
                 // 【关键修改3】计算要发送的准确字节数
                 uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
                 for (int i = 0; i < size_to_send; i++) {
                     EPD_2IN13_V2_SendData(page_buffer[i]);
+									        // 每发送 256 字节，就执行一次“保活”操作
+									if (i % 256 == 0) {
+									wdg_reload(WATCHDOG_DEFAULT_PERIOD);
+									//arch_ble_force_wakeup();
+										}
                 }
 
                 page_to_render++; // 准备渲染下一页
-            } else {
+									} else {
                 page_to_render = 0; 
                 step++;
-            }
-            break;
+							}
+							break;
 
         case 4: // 准备发送旧图像数据 (命令 0x26)
             EPD_2IN13_V2_SendCommand(0x26);
             step++;
             // 直接进入下一步
 
-//        case 5: // 循环渲染并发送每一页 (for OLD image)
-//            // 【重要】这里的逻辑必须与 case 3 完全镜像
-//            if (page_to_render < NUM_PAGES) {
-//                current_page_y_start = page_to_render * PAGE_HEIGHT;
-
-//                int current_page_actual_height = PAGE_HEIGHT;
-//                if (current_page_y_start + PAGE_HEIGHT > LOGIC_HEIGHT) {
-//                    current_page_actual_height = LOGIC_HEIGHT - current_page_y_start;
-//                }
-
-//                Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
-//                Paint_SetMirroring(MIRROR_VERTICAL);
-//                Paint_Clear(WHITE);
-//                
-//                do_display_update_with_analog_clock();
-
-//                uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
-//                for (int i = 0; i < size_to_send; i++) {
-//                    EPD_2IN13_V2_SendData(page_buffer[i]);
-//                }
-//                page_to_render++;
-//            } else {
-//                step++;
-//            }
-//            break;
-
-case 5: // 【已修正】循环发送“空白”数据到红色通道
-    if (page_to_render < NUM_PAGES) {
-        
-        // 1. 【关键修正】计算当前页需要发送的字节数 (这个逻辑来自您旧的 case 3)
-        // 我们需要确保 current_page_buffer_size 在这里被正确赋值。
+				case 5: // 【已修正】循环发送“空白”数据到红色通道
+						if (page_to_render < NUM_PAGES) {
+        // =================================================================
+        // 这一部分的分页逻辑，必须和 case 3 完全一样！
+        // =================================================================
+        // 1. 计算当前页的 y 坐标和实际高度
+        current_page_y_start = page_to_render * PAGE_HEIGHT;
         int current_page_actual_height = PAGE_HEIGHT;
-        if (page_to_render * PAGE_HEIGHT + PAGE_HEIGHT > LOGIC_HEIGHT) {
-            current_page_actual_height = LOGIC_HEIGHT - (page_to_render * PAGE_HEIGHT);
+        if (current_page_y_start + PAGE_HEIGHT > LOGIC_HEIGHT) {
+            current_page_actual_height = LOGIC_HEIGHT - current_page_y_start;
         }
-        // 将计算出的正确大小，赋值给全局变量
-        current_page_buffer_size = (LOGIC_WIDTH * current_page_actual_height) / 8;
 
-        // 2. 【关键修正】使用这个正确的、动态的大小来清空缓冲区
-        memset(page_buffer, 0x00, current_page_buffer_size);
-
-        // 3. 发送这个空白的缓冲区
-        for (int i = 0; i < current_page_buffer_size; i++) {
+        // 2. 初始化 Paint 库 (这一步在两个分支中都需要)
+        Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
+        Paint_Clear(WHITE); // 用白色清空缓冲区
+            do_old_display_update_with_analog_clock();
+        // 4. 发送数据
+        uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
+        for (int i = 0; i < size_to_send; i++) {
             EPD_2IN13_V2_SendData(page_buffer[i]);
-        }
-
-        page_to_render++; // 准备发送下一页的空白数据
-    } else {
-        step++; // 所有空白数据都发送完毕，进入下一步
-    }
-    break;
+							if (i % 256 == 0) {                               //喂狗
+								wdg_reload(WATCHDOG_DEFAULT_PERIOD);
+								//arch_ble_force_wakeup();
+									}
+						}		
+						page_to_render++; // 准备渲染下一页
+				} else {
+						page_to_render = 0; // 为下一次 display() 调用重置 page_to_render
+						step++;             // 所有页都发送完毕，进入下一步
+							}
+				break;
 
         case 6: // 触发屏幕刷新
-            EPD_2IN13_V2_TurnOnDisplay();
-            step++;
-            break;
+            EPD_2IN13_V2_TurnOnDisplay(); // 全刷 (0xF7)
+        step++;
+        break;
 
         case 7: // 等待刷新完成
             if (EPD_BUSY == 0) {
@@ -914,11 +850,10 @@ case 5: // 【已修正】循环发送“空白”数据到红色通道
             is_busy = false;
             break;
     }
-
     if (is_busy) {
         app_easy_timer(delay, display);
     }
-}
+} 
 
 void bls_att_pushNotifyData(uint16_t attHandle, uint8_t *p, uint8_t len)
 {
@@ -1129,15 +1064,10 @@ void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
         
         // 1. 更新时间戳
         current_unix_time = (param->value[1] << 24) + (param->value[2] << 16) + (param->value[3] << 8) + (param->value[4] & 0xff);
-        
+        is_date_changed = true;
         // 2. 立即用新时间戳计算所有需要显示的字符串
-        transformTime(current_unix_time, &g_tm);
-        struct Lunar_Date lunar_date;
-        LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-        sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-        sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
-        sprintf(lunar_str, "%s%s  星期%s", Lunar_MonthString[lunar_date.Month], Lunar_DateString[lunar_date.Date], WEEKCN[g_tm.tm_wday]);
-        
+        update_all_display_strings();
+			
         // 3. 立即触发一次显示
         if (step == 0) {
             step = 1;
@@ -1201,7 +1131,6 @@ void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
         display();
         arch_printf("Switched to CALENDAR ANALOG display mode\n");
     }
-
 } // <--- 这是整个函数的结束括号，确保它在最后
 
 

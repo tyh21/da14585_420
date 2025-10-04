@@ -293,7 +293,7 @@ static const struct connection_param_configuration user_connection_param_conf = 
 
     /// Supervision timeout measured in timer units (10 ms)
     /// use the macro MS_TO_TIMERUNITS to convert from milliseconds (ms) to timer units
-    .time_out = MS_TO_TIMERUNITS(3000),
+    .time_out = MS_TO_TIMERUNITS(6000),
 
     /// Minimum Connection Event Duration measured in ble double slots (1.25ms)
     /// use the macro MS_TO_DOUBLESLOTS to convert from milliseconds (ms) to double slots
@@ -314,11 +314,11 @@ static const struct connection_param_configuration user_connection_param_conf_hi
     .intv_max = MS_TO_DOUBLESLOTS(20),
 
     /// Latency measured in connection events
-    .latency = 0,
+    .latency = 9,
 
     /// Supervision timeout measured in timer units (10 ms)
     /// use the macro MS_TO_TIMERUNITS to convert from milliseconds (ms) to timer units
-    .time_out = MS_TO_TIMERUNITS(1300),
+    .time_out = MS_TO_TIMERUNITS(5000),
 
     /// Minimum Connection Event Duration measured in ble double slots (1.25ms)
     /// use the macro MS_TO_DOUBLESLOTS to convert from milliseconds (ms) to double slots
