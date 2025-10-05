@@ -111,6 +111,29 @@ void EPD_2IN13_V2_SendData(UBYTE Data)
     DEV_SPI_WriteByte(Data);
     EPD_CS_H;
 }
+
+void EPD_SendDataBlock(const uint8_t* data, uint16_t len)
+{
+    // 1. 设置 D/C 引脚为高电平，告诉屏幕：“接下来是数据！”
+    //    这个函数只需要在发送数据块之前调用一次。
+    EPD_DC_H;
+
+    // 2. 拉低 CS 引脚，就像打开卡车的车门，准备开始“装货”。
+    //    这是整个“块传输”的开始信号。
+    EPD_CS_L;
+
+    // 3. 使用一个高效的 for 循环，连续不断地发送数据块中的每一个字节。
+    //    注意：我们在这里依然调用的是底层的、硬件驱动的 DEV_SPI_WriteByte，
+    //    我们没有去修改它，只是改变了调用它的方式。
+    for (uint16_t i = 0; i < len; i++) {
+        DEV_SPI_WriteByte(data[i]);
+    }
+
+    // 4. 所有数据都发送完毕后，拉高 CS 引脚，就像关上卡车的车门，告诉屏幕：“装货完毕！”
+    //    这是整个“块传输”的结束信号。
+    EPD_CS_H;
+}
+
 /******************************************************************************
 * @brief  Waits for the e-Paper to become idle.
 * @note   This is the corrected version for a real-time system. It includes

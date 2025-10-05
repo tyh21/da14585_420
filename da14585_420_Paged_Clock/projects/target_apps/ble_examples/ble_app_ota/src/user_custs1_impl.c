@@ -433,120 +433,6 @@ void do_old_display_update_with_analog_clock(void)
  * FUNCTION DEFINITIONS
  ****************************************************************************************
  */
-void do_img_save(void)
-{
-    uint32_t actual_size;
-    if (imgheader.signature[0] == IMG_HEADER_SIGNATURE1 && imgheader.signature[1] == IMG_HEADER_SIGNATURE2 && imgheader.validflag != IMG_HEADER_VALID)
-    {
-        imgheader.validflag = IMG_HEADER_VALID;
-        img_header_t *imgheadertmp;
-        spi_flash_peripheral_init();
-
-        uint8_t buf[20] = {0};
-        int8_t status = spi_flash_read_data(buf, IMG_HEADER_ADDRESS, sizeof(img_header_t), &actual_size);
-        arch_printf("status0:%d\n", status);
-        imgheadertmp = (img_header_t *)buf;
-        // if (imgheadertmp->CRC != imgheader.CRC)
-        // {
-        // status=spi_flash_block_erase(IMG_HEADER_ADDRESS, SPI_FLASH_OP_BE32);
-        // arch_printf("status1:%d\n",status);
-        // arch_printf("erase\n");
-        // status=spi_flash_set_write_enable();
-        // arch_printf("status4s:%d\n",status);
-        // status=spi_flash_write_data((uint8_t *)&imgheader, IMG_HEADER_ADDRESS, sizeof(img_header_t), &actual_size);
-        // arch_printf("status2:%d\n",status);
-        // arch_printf("imgheader wr:%d\n", actual_size);
-        // status=spi_flash_write_data(epd_buffer, IMG_HEADER_ADDRESS + sizeof(img_header_t), sizeof(epd_buffer), &actual_size);
-        // arch_printf("status3:%d\n",status);
-        // arch_printf("epd_buffer wr:%d size:%d\n", actual_size,sizeof(epd_buffer));
-        // }
-        spi_flash_ultra_deep_power_down();
-    }
-}
-
-/**
- * @brief 修改后的分钟工作函数
- */
-//void do_min_work_with_analog_clock(void)
-//{
-//    timer_used_min = app_easy_timer(APP_PERIPHERAL_CTRL_TIMER_DELAY_MINUTES, do_min_work_with_analog_clock);
-//    current_unix_time += time_offset;
-//    time_offset = 60;
-//    
-//    arch_printf("current_unix_time:%d\n", current_unix_time);
-//    
-//    // 使用新的显示更新函数
-//    do_display_update_with_analog_clock();
-//    
-//    if (step == 0)
-//    {
-//        step = 1;
-//        display();
-//    }
-//}
-
-void do_min_work_with_analog_clock(void)
-{
-    timer_used_min = app_easy_timer(APP_PERIPHERAL_CTRL_TIMER_DELAY_MINUTES, do_min_work_with_analog_clock);    // 1. 设置下一次的 60 秒定时器
-    current_unix_time += time_offset;                           //更新当前的 Unix 时间戳
-    time_offset = 60;
-    // a. 计算 tm_t 结构体
-    transformTime(current_unix_time, &g_tm);
-
-//    // b. 计算农历结构体
-//    struct Lunar_Date lunar_date;
-//    LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-
-//    // c. 格式化所有需要显示的字符串，并存入全局变量
-//    sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-//    sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
-//    sprintf(lunar_str, "%s%s  星期%s", 
-//            Lunar_MonthString[lunar_date.Month], 
-//            Lunar_DateString[lunar_date.Date],
-//            WEEKCN[g_tm.tm_wday]);
-//    // ====================================================================
-
-//    // 4. 如果当前没有正在进行的显示任务，就启动一次新的显示
-//    if (step == 0)
-//    {
-//        step = 1;
-//        display();
-//    }
-//}
-    // ================== 【核心修改】使用中文转换 ==================
-    
-    // a. 定义临时的中文字符串缓冲区
-    char chinese_year[20];
-    char chinese_month[10];
-    char chinese_day[10];
-
-    // b. 调用转换函数
-    year_to_chinese(g_tm.tm_year + YEAR0, chinese_year);
-    num_to_chinese(g_tm.tm_mon + 1, chinese_month);
-    num_to_chinese(g_tm.tm_mday, chinese_day);
-
-    // c. 格式化最终的全局日期字符串
-		sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-    sprintf(date_str_CN, "%s年%s月%s日", chinese_year, chinese_month, chinese_day);
-
-    // (时间和农历的计算保持不变)
-    sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
-    
-    struct Lunar_Date lunar_date;
-    LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-    sprintf(lunar_str, "%s%s  星期%s", 
-            Lunar_MonthString[lunar_date.Month], 
-            Lunar_DateString[lunar_date.Date],
-            WEEKCN[g_tm.tm_wday]);
-    // ====================================================================
-
-    // 4. 如果当前没有正在进行的显示任务，就启动一次新的显示
-    if (step == 0)
-    {
-        step = 1;
-        display();
-    }
-}
 
 void update_all_display_strings(void)
 {
@@ -579,6 +465,79 @@ void update_all_display_strings(void)
 		sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
 }
 
+void do_img_save(void)
+{
+    uint32_t actual_size;
+    if (imgheader.signature[0] == IMG_HEADER_SIGNATURE1 && imgheader.signature[1] == IMG_HEADER_SIGNATURE2 && imgheader.validflag != IMG_HEADER_VALID)
+    {
+        imgheader.validflag = IMG_HEADER_VALID;
+        img_header_t *imgheadertmp;
+        spi_flash_peripheral_init();
+
+        uint8_t buf[20] = {0};
+        int8_t status = spi_flash_read_data(buf, IMG_HEADER_ADDRESS, sizeof(img_header_t), &actual_size);
+        arch_printf("status0:%d\n", status);
+        imgheadertmp = (img_header_t *)buf;
+        // if (imgheadertmp->CRC != imgheader.CRC)
+        // {
+        // status=spi_flash_block_erase(IMG_HEADER_ADDRESS, SPI_FLASH_OP_BE32);
+        // arch_printf("status1:%d\n",status);
+        // arch_printf("erase\n");
+        // status=spi_flash_set_write_enable();
+        // arch_printf("status4s:%d\n",status);
+        // status=spi_flash_write_data((uint8_t *)&imgheader, IMG_HEADER_ADDRESS, sizeof(img_header_t), &actual_size);
+        // arch_printf("status2:%d\n",status);
+        // arch_printf("imgheader wr:%d\n", actual_size);
+        // status=spi_flash_write_data(epd_buffer, IMG_HEADER_ADDRESS + sizeof(img_header_t), sizeof(epd_buffer), &actual_size);
+        // arch_printf("status3:%d\n",status);
+        // arch_printf("epd_buffer wr:%d size:%d\n", actual_size,sizeof(epd_buffer));
+        // }
+        spi_flash_ultra_deep_power_down();
+    }
+}
+
+void do_min_work_with_analog_clock(void)
+{
+    timer_used_min = app_easy_timer(APP_PERIPHERAL_CTRL_TIMER_DELAY_MINUTES, do_min_work_with_analog_clock);    // 1. 设置下一次的 60 秒定时器
+    current_unix_time += time_offset;                           //更新当前的 Unix 时间戳
+    time_offset = 60;
+    // a. 计算 tm_t 结构体
+//    transformTime(current_unix_time, &g_tm);
+
+//    // ================== 【核心修改】使用中文转换 ==================
+//    
+//    // a. 定义临时的中文字符串缓冲区
+//    char chinese_year[20];
+//    char chinese_month[10];
+//    char chinese_day[10];
+
+//    // b. 调用转换函数
+//    year_to_chinese(g_tm.tm_year + YEAR0, chinese_year);
+//    num_to_chinese(g_tm.tm_mon + 1, chinese_month);
+//    num_to_chinese(g_tm.tm_mday, chinese_day);
+
+//    // c. 格式化最终的全局日期字符串
+//		sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
+//    sprintf(date_str_CN, "%s年%s月%s日", chinese_year, chinese_month, chinese_day);
+
+//    // (时间和农历的计算保持不变)
+//    sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
+//    
+//    struct Lunar_Date lunar_date;
+//    LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
+//    sprintf(lunar_str, "%s%s  星期%s", 
+//            Lunar_MonthString[lunar_date.Month], 
+//            Lunar_DateString[lunar_date.Date],
+//            WEEKCN[g_tm.tm_wday]);
+    // ====================================================================
+			update_all_display_strings(); 
+    // 4. 如果当前没有正在进行的显示任务，就启动一次新的显示
+    if (step == 0)
+    {
+        step = 1;
+        display();
+    }
+}
 void my_app_on_db_init_complete(void)
 {
     crc32_init(DEFAULT_POLY);
@@ -772,15 +731,7 @@ void display(void)
                 // 5. 发送数据
                 // 【关键修改3】计算要发送的准确字节数
                 uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
-                for (int i = 0; i < size_to_send; i++) {
-                    EPD_2IN13_V2_SendData(page_buffer[i]);
-									        // 每发送 256 字节，就执行一次“保活”操作
-									if (i % 256 == 0) {
-									wdg_reload(WATCHDOG_DEFAULT_PERIOD);
-									//arch_ble_force_wakeup();
-										}
-                }
-
+                EPD_SendDataBlock(page_buffer, size_to_send);
                 page_to_render++; // 准备渲染下一页
 									} else {
                 page_to_render = 0; 
@@ -811,13 +762,12 @@ void display(void)
             do_old_display_update_with_analog_clock();
         // 4. 发送数据
         uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
-        for (int i = 0; i < size_to_send; i++) {
-            EPD_2IN13_V2_SendData(page_buffer[i]);
-							if (i % 256 == 0) {                               //喂狗
-								wdg_reload(WATCHDOG_DEFAULT_PERIOD);
+        //for (int i = 0; i < size_to_send; i++) {
+        //    EPD_2IN13_V2_SendData(page_buffer[i]);
+				//			if (i % 256 == 0) {                               //喂狗
+				//				wdg_reload(WATCHDOG_DEFAULT_PERIOD);
 								//arch_ble_force_wakeup();
-									}
-						}		
+				EPD_SendDataBlock(page_buffer, size_to_send);	
 						page_to_render++; // 准备渲染下一页
 				} else {
 						page_to_render = 0; // 为下一次 display() 调用重置 page_to_render
@@ -1066,19 +1016,21 @@ void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
         current_unix_time = (param->value[1] << 24) + (param->value[2] << 16) + (param->value[3] << 8) + (param->value[4] & 0xff);
         is_date_changed = true;
         // 2. 立即用新时间戳计算所有需要显示的字符串
-        update_all_display_strings();
+        //update_all_display_strings();
 			
         // 3. 立即触发一次显示
-        if (step == 0) {
-            step = 1;
-            display();
-        }
-
+        //if (step == 0) {
+        //    step = 1;
+        //    display();
+        //}
+				app_easy_timer_cancel(timer_used_min);
         // 4. 最后，精确地设置下一次的定时器
-        app_easy_timer_cancel(timer_used_min);
-        time_offset = 60 - g_tm.tm_sec;
-        timer_used_min = app_easy_timer(time_offset * 100, do_min_work_with_analog_clock);
-
+        //app_easy_timer_cancel(timer_used_min);
+        //time_offset = 60 - g_tm.tm_sec;
+        //timer_used_min = app_easy_timer(time_offset * 100, do_min_work_with_analog_clock);
+				transformTime(current_unix_time, &g_tm); 
+				time_offset = 60 - g_tm.tm_sec;  
+				do_min_work_with_analog_clock(); // 立即手动触发一次！
     } // <--- 这是 if (0xDD) 的结束括号，确保它在这里
     
     else if (param->value[0] == 0xAA)
