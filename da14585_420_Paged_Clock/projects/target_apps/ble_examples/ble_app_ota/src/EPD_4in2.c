@@ -244,58 +244,6 @@ void EPD_4IN2_V2Init_RED(void) {
         EPD_4IN2_V2SendData(0x00);
     
 }
-
-/******************************************************************************
-function :	Initialize the e-Paper register
-parameter:
-******************************************************************************/
-void EPD_4IN2_V2Init(UBYTE Mode)
-{
-    // 步骤 1: 硬件和软件复位 (保持不变)
-    EPD_4IN2_V2Reset();
-    EPD_4IN2_V2ReadBusy();
-    EPD_4IN2_V2SendCommand(0x12); // SW_RESET
-    EPD_4IN2_V2ReadBusy();
-
-    // 步骤 2: 设置边框和温度传感器 (保持不变)
-    EPD_4IN2_V2SendCommand(0x3C); // CMD_BORDER_CTRL
-    EPD_4IN2_V2SendData(0x01);
-    EPD_4IN2_V2SendCommand(0x18); // CMD_TSENSOR_CTRL
-    EPD_4IN2_V2SendData(0x80);
-
-    // =======================================================================
-    // !! 步骤 3: 【最终修正】严格按照标准答案设置RAM !!
-    // =======================================================================
-
-    // Data Entry Mode (X-inc, Y-inc)
-    EPD_4IN2_V2SendCommand(0x11);
-    EPD_4IN2_V2SendData(0x03);
-
-    // Set RAM X-address Start/End position (0 to 399)
-    EPD_4IN2_V2SendCommand(0x44);
-    EPD_4IN2_V2SendData(0x00);           // X-start = 0
-    EPD_4IN2_V2SendData(49);             // X-end = 49 (399 / 8)
-
-    // Set RAM Y-address Start/End position (0 to 299)
-    EPD_4IN2_V2SendCommand(0x45);
-    EPD_4IN2_V2SendData(0x00);           // Y-start low = 0
-    EPD_4IN2_V2SendData(0x00);           // Y-start high = 0
-    EPD_4IN2_V2SendData(299 % 256);      // Y-end low = 43
-    EPD_4IN2_V2SendData(299 / 256);      // Y-end high = 1
-
-    // Set RAM X address counter to 0
-    EPD_4IN2_V2SendCommand(0x4E);
-    EPD_4IN2_V2SendData(0x00);
-
-    // Set RAM Y address counter to 0
-    EPD_4IN2_V2SendCommand(0x4F);
-    EPD_4IN2_V2SendData(0x00);
-    EPD_4IN2_V2SendData(0x00);
-    
-    // 等待所有操作完成
-    EPD_4IN2_V2ReadBusy();
-}
-
 /**
  * @brief  设置EPD显示窗口位置和大小。
  * @param  x 显示窗口起始X位置。
@@ -539,7 +487,7 @@ void EPD_4IN2_V2Sleep(void)
     EPD_4IN2_V2SendData(0x01);
     // DEV_Delay_ms(100);
 }
-void EPD_Init_Pure_Weixue_Sequence(void)
+void EPD_Init(void)
 {
     // 使用我们自己的 Reset 和 ReadBusy
     EPD_4IN2_V2Reset();

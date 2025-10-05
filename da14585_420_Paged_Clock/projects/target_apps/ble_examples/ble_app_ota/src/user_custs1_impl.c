@@ -312,93 +312,6 @@ void do_time_show_diff_part(void)
 /**
  * @brief 修改后的显示更新函数，支持模拟时钟
  */
-//void do_display_update_with_analog_clock(void)
-//{
-//    transformTime(current_unix_time, &g_tm);
-//    
-//    // 判断是否需要强制重绘
-//    bool force_redraw = false;
-//    
-//    // 如果是第一次显示或者小时发生变化，强制重绘
-//    if (last_update_time == 0 || 
-//        (current_unix_time - last_update_time) > 3600 || // 超过1小时
-//        g_tm.tm_min == 0) // 整点时刻
-//    {
-//        force_redraw = true;
-//        last_update_time = current_unix_time;
-//    }
-//    
-//    // 如果分钟发生变化，需要更新指针
-//    bool minute_changed = (last_minute != g_tm.tm_min);
-//    if (minute_changed)
-//    {
-//        last_minute = g_tm.tm_min;
-//    }
-//    
-//    switch (current_display_mode)
-//    {
-//        case DISPLAY_MODE_TIME:
-//            // 原有的时间显示逻辑
-//            //do_time_show_diff();
-//                if (force_redraw) {
-//                do_time_show_diff(); // 全屏重绘 
-//                } else if (minute_changed) {
-//                do_time_show_diff(); // 全屏重绘 
-//                //    do_time_show_diff_part(); // 局部刷新分钟数字 
-//            }
-//            break;
-//            
-//        case DISPLAY_MODE_CALENDAR:
-//            // 原有的日历显示逻辑（数字时钟）
-//            Paint_NewImage(EPD_4IN2_V2WIDTH, EPD_4IN2_V2HEIGHT, 270, WHITE);
-////            Paint_SelectImage(epd_buffer);
-//            Paint_SetMirroring(MIRROR_VERTICAL);
-//            draw_calendar_page(current_unix_time);
-//            break;
-//            
-//        case DISPLAY_MODE_CALENDAR_ANALOG:
-//            // 新的日历显示逻辑（模拟时钟）
-//            Paint_NewImage(EPD_4IN2_V2WIDTH, EPD_4IN2_V2HEIGHT, 270, WHITE);
-////            Paint_SelectImage(epd_buffer);
-//            Paint_SetMirroring(MIRROR_VERTICAL);
-//            // 使用新的模拟时钟日历函数
-//            draw_calendar_with_analog_clock(current_unix_time, force_redraw || minute_changed);
-//            break;
-//            
-//        default:
-//            // 默认使用时间显示
-//            current_display_mode = DISPLAY_MODE_TIME;
-//            do_display_update_with_analog_clock(); // 递归调用
-//            return;
-//    }
-//    
-//    // 添加电池电量显示（所有模式通用）
-//    Paint_DrawRectangle(296 - 24, 6 + 2, 296 - 24 + 2, 8 + 2 + 2, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-//    Paint_DrawRectangle(296 - 22, 1 + 2, 295, 20 - 5 + 2, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-//    sprintf(buf, "%d", cur_batt_level);
-//    if (cur_batt_level > 9 && cur_batt_level < 100)
-//    {
-//        sprintf(buf, " %d", cur_batt_level);
-//    }
-//    else if (cur_batt_level < 10)
-//    {
-//        sprintf(buf, "  %d", cur_batt_level);
-//    }
-//    EPD_DrawUTF8(296 - 23, 1 + 2, 0, buf, EPD_ASCII_7X12, 0, WHITE, BLACK);
-//    
-//    // 蓝牙连接状态指示
-//    if (isconnected == 1)
-//    {
-//        EPD_DrawUTF8(296 - 10, 128-12, 0, "B", EPD_ASCII_7X12, 0, WHITE, BLACK);
-//    }
-
-//    if (g_tm.tm_min == 0)
-//    {
-//        is_part = 0;
-//    }
-//    step = 0;
-//}
-
 
 void do_display_update_with_analog_clock(void)
 {
@@ -406,17 +319,12 @@ void do_display_update_with_analog_clock(void)
     // 这个函数现在不进行任何计算，只负责绘图
 
     // 1. 在第 10 行，写公历日期 (从全局变量读取)
-		//arch_ble_force_wakeup();
     EPD_DrawUTF8(10, 10, 1, date_str_CN, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
 
     // 2. 在第 50 行，写时间 (从全局变量读取)
-    //EPD_DrawUTF8(10, 50, 1, time_str, EPD_ASCII_11X16, big80X100_font, BLACK, WHITE);
-		// 假设你想在 (X=40, Y=80) 的位置开始绘制时间
-		//arch_ble_force_wakeup();
     Paint_DrawBigNumberString(0, 80, time_str, BLACK);
 	
     // 3. 在第 260 行，写农历和星期 (从全局变量读取)
-		//arch_ble_force_wakeup();
     EPD_DrawUTF8(10, 260, 1, lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
 }
 
@@ -425,7 +333,7 @@ void do_old_display_update_with_analog_clock(void)
      //这个函数使用备份的、上一分钟的字符串
     //EPD_DrawUTF8(10, 10, 1, date_str_CN, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
     Paint_DrawBigNumberString(0, 80, old_time_str, BLACK);
-    EPD_DrawUTF8(10, 260, 1, old_lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
+    //EPD_DrawUTF8(10, 260, 1, old_lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
 }
 
 
@@ -588,77 +496,6 @@ void user_svc1_ctrl_wr_ind_handler(ke_msg_id_t const msgid,
     }
 }
 
-//void display(void)
-//{
-//    time_refresh_count = 0;
-//    uint8_t isbusy = 1;
-//    uint32_t delay = APP_PERIPHERAL_CTRL_TIMER_DELAY;
-//    uint8_t out_buffer[2];
-//    spi_set_bitmode(SPI_MODE_8BIT);
-//    spi_cs_high();
-//    switch (step)
-//    {
-//    case 1:
-//        cur_batt_level = 100;
-//        app_batt_lvl();
-//        arch_printf("epd_init\n");
-//        EPD_GPIO_init();
-//        EPD_4IN2_V2Init(is_part);
-//        step++;
-//        break;
-//    case 2:
-//        if (is_part == 0)
-//        {
-//            EPD_4IN2_V2DisplayPartBaseImage(epd_buffer);
-//        }
-//        else
-//        {
-//            EPD_4IN2_V2DisplayPart(epd_buffer);
-//        }
-
-//        step++;
-//        break;
-//    case 3:
-//        if (is_part == 0)
-//        {
-//            is_part = 1;
-//            EPD_4IN2_V2TurnOnDisplay();
-//        }
-//        else
-//        {
-//            EPD_4IN2_V2TurnOnDisplayPart();
-//        }
-
-//        step++;
-//        break;
-//    case 4:
-//        app_batt_lvl();
-//        if (EPD_BUSY == 0)
-//        {
-//            isbusy = 0;
-//            step = 0;
-//            arch_printf("epd_sleep\n");
-//            EPD_4IN2_V2Sleep();
-//            out_buffer[0] = 0xff;
-//            out_buffer[1] = 0xff;
-//            bls_att_pushNotifyData(SVC1_IDX_LED_STATE_VAL, out_buffer, 2);
-//        }
-
-//        break;
-//    default:
-//        break;
-//    }
-
-//    if (isbusy && (step != 0))
-//    {
-//        app_easy_timer(delay, display);
-//    }
-//    else
-//    {
-//        app_easy_timer_cancel(timer_used);
-//    }
-//}
-
 // =================== display 函数 (最终内存安全版) ===================
 /******************************************************************************
 * | Function    :   display (Final Paged Version)
@@ -691,9 +528,6 @@ void display(void)
     // 从您的旧函数中保留的变量
     uint8_t out_buffer[2];
     uint32_t delay = APP_PERIPHERAL_CTRL_TIMER_DELAY;
-	
-//		bool is_full_update = (minute_counter == 0) || (minute_counter % 10 == 0);
-//		static bool partial_mode_initialized = false;
 
     switch (step)
     {
@@ -702,7 +536,7 @@ void display(void)
             break;
 
         case 1: // 初始化
-            EPD_Init_Pure_Weixue_Sequence();     //微雪驱动，可以飞刷
+            EPD_Init();     //微雪驱动，可以飞刷
 						page_to_render = 0;
 						step++;
 						break; // 这里需要 break，不能直接进入下一步
@@ -905,94 +739,6 @@ void user_svc1_led_wr_ind_handler(ke_msg_id_t const msgid,
         return;
     }
 }
-
-/**
- * @brief 修改后的串口命令处理函数，添加模拟时钟模式切换
- */
-//void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
-//                              struct custs1_val_write_ind const *param,
-//                              ke_task_id_t const dest_id,
-//                              ke_task_id_t const src_id)
-//{
-//    arch_printf("cmd HEX %d:", param->length);
-//    for (int i = 0; i < param->length; i++)
-//    {
-//        arch_printf("%02X", param->value[i]);
-//    }
-//    arch_printf("\r\n");
-//    
-//    if ((param->value[0] == 0xDD) && (param->length >= 5))
-//    {
-//        // 时间设置逻辑保持不变
-//        current_unix_time = (param->value[1] << 24) + (param->value[2] << 16) + (param->value[3] << 8) + (param->value[4] & 0xff);
-//        tm_t tm = {0};
-//        transformTime(current_unix_time, &tm);
-//        app_easy_timer_cancel(timer_used_min);
-//        time_offset = 60 - tm.tm_sec;
-//        timer_used_min = app_easy_timer(time_offset * 100, do_min_work_with_analog_clock);
-//        
-//        // 重置更新时间，强制重绘
-//        last_update_time = 0;
-//        
-//        arch_printf("%d-%02d-%02d %02d:%02d:%02d %d\n", tm.tm_year + YEAR0,
-//                    tm.tm_mon + 1,
-//                    tm.tm_mday,
-//                    tm.tm_hour,
-//                    tm.tm_min,
-//                    tm.tm_sec,
-//                    tm.tm_wday);
-//    }
-//    else if (param->value[0] == 0xAA)
-//    {
-//        platform_reset(RESET_NO_ERROR);
-//    }
-//    else if (param->value[0] == 0xAB)
-//    {
-//        // do_img_save();
-//    }
-//    else if (param->value[0] == 0xE2)
-//    {
-//        // 刷新当前显示模式
-//        last_update_time = 0; // 强制重绘
-//        do_display_update_with_analog_clock();
-//        is_part = 0;
-//        step = 1;
-//        display();
-//    }
-//    else if (param->value[0] == 0xE3)
-//    {
-//        // 切换到时间显示模式
-//        current_display_mode = DISPLAY_MODE_TIME;
-//        last_update_time = 0; // 强制重绘
-//        do_display_update_with_analog_clock();
-//        is_part = 0;
-//        step = 1;
-//        display();
-//        arch_printf("Switched to TIME display mode\n");
-//    }
-//    else if (param->value[0] == 0xE4)
-//    {
-//        // 切换到日历显示模式（数字时钟）
-//        current_display_mode = DISPLAY_MODE_CALENDAR;
-//        last_update_time = 0; // 强制重绘
-//        do_display_update_with_analog_clock();
-//        is_part = 0;
-//        step = 1;
-//        display();
-//        arch_printf("Switched to CALENDAR display mode\n");
-//    }
-//    else if (param->value[0] == 0xE5)
-//    {
-//        // 新增：切换到日历显示模式（模拟时钟）
-//        current_display_mode = DISPLAY_MODE_CALENDAR_ANALOG;
-//        last_update_time = 0; // 强制重绘
-//        do_display_update_with_analog_clock();
-//        is_part = 0;
-//        step = 1;
-//        display();
-//        arch_printf("Switched to CALENDAR ANALOG display mode\n");
-//    }
-//}
 
 void user_svc2_wr_ind_handler(ke_msg_id_t const msgid,
                               struct custs1_val_write_ind const *param,

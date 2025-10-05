@@ -56,7 +56,6 @@ void EPD_4IN2_V2Init_RED(void);
 void EPD_4IN2_V2TurnOnDisplay_RED(void);
 void EPD_4IN2_V2Clear_RED(void);
 void DEV_SPI_WriteByte(uint8_t sdbyte);
-void EPD_4IN2_V2Init(UBYTE Mode);
 void EPD_4IN2_V2Clear(void);
 void EPD_4IN2_V2Display(UBYTE *Image);
 void EPD_4IN2_V2DisplayPart(UBYTE *Image);
@@ -69,7 +68,7 @@ void EPD_SetWindow(uint16_t x, uint8_t y_x8, uint16_t x_size, uint8_t y_size_x8)
 void EPD_4IN2_V2SendCommand(UBYTE Reg);
 void EPD_4IN2_V2SendData(UBYTE Data);
 void EPD_SendDataBlock(const uint8_t* data, uint16_t len);
-void EPD_Init_Pure_Weixue_Sequence(void);
+void EPD_Init(void);
 void EPD_4IN2_V2Init_Partial_Mode_Legacy(void);           //这个函数应该不起作用
 void EPD_4IN2_V2TurnOnDisplay_Partial_Legacy(void);       //这个函数应该不起作用
 #endif
