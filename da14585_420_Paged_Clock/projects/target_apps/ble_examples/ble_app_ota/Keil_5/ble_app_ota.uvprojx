@@ -1271,11 +1271,6 @@
               <FilePath>..\src\user_ota.c</FilePath>
             </File>
             <File>
-              <FileName>EPD_2in13_V2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\EPD_2in13_V2.c</FilePath>
-            </File>
-            <File>
               <FileName>ImageData.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\ImageData.c</FilePath>
@@ -1375,6 +1370,11 @@
               <FileName>ImageData.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\src\ImageData.h</FilePath>
+            </File>
+            <File>
+              <FileName>EPD_4in2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\EPD_4in2.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2700,11 +2700,6 @@
               <FilePath>..\src\user_ota.c</FilePath>
             </File>
             <File>
-              <FileName>EPD_2in13_V2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\EPD_2in13_V2.c</FilePath>
-            </File>
-            <File>
               <FileName>ImageData.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\ImageData.c</FilePath>
@@ -2753,6 +2748,11 @@
               <FileName>ImageData.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\src\ImageData.h</FilePath>
+            </File>
+            <File>
+              <FileName>EPD_4in2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\EPD_4in2.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3976,11 +3976,6 @@
               <FilePath>..\src\user_ota.c</FilePath>
             </File>
             <File>
-              <FileName>EPD_2in13_V2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\EPD_2in13_V2.c</FilePath>
-            </File>
-            <File>
               <FileName>ImageData.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\ImageData.c</FilePath>
@@ -4029,6 +4024,11 @@
               <FileName>ImageData.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\src\ImageData.h</FilePath>
+            </File>
+            <File>
+              <FileName>EPD_4in2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\EPD_4in2.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -5252,11 +5252,6 @@
               <FilePath>..\src\user_ota.c</FilePath>
             </File>
             <File>
-              <FileName>EPD_2in13_V2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\EPD_2in13_V2.c</FilePath>
-            </File>
-            <File>
               <FileName>ImageData.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\ImageData.c</FilePath>
@@ -5305,6 +5300,11 @@
               <FileName>ImageData.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\src\ImageData.h</FilePath>
+            </File>
+            <File>
+              <FileName>EPD_4in2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\EPD_4in2.c</FilePath>
             </File>
           </Files>
         </Group>

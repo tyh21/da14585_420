@@ -1,5 +1,4 @@
-./out_da14585/objects/app_suotar.o: \
-  ..\..\..\..\..\sdk\app_modules\src\app_suotar\app_suotar.c \
+./out_da14585/objects/epd_4in2.o: ..\src\EPD_4in2.c \
   ..\src\config\da1458x_config_basic.h \
   ..\..\..\..\..\sdk\common_project_files\da1458x_stack_config.h \
   ..\src\config\user_profiles_config.h \
@@ -110,37 +109,8 @@
   ..\..\..\..\..\sdk\ble_stack\profiles\suota\suotar\api\suotar_task.h \
   ..\..\..\..\..\sdk\ble_stack\profiles\suota\suotar\api\suotar.h \
   ..\..\..\..\..\sdk\app_modules\api\app_security.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_adv_data.h \
-  ..\..\..\..\..\sdk\platform\core_modules\rwip\api\rwip.h \
-  ..\..\..\..\..\sdk\platform\core_modules\rwip\api\rwip_config.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_api.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_task.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_user_config.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_entry_point.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_default_handlers.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_callback.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_easy_security.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_mid.h \
-  ..\..\..\..\..\sdk\ble_stack\controller\llm\llm.h \
-  ..\..\..\..\..\sdk\platform\core_modules\common\api\co_math.h \
-  d:\Tools\Keil5\ARM\ARMCLANG\Bin\..\include\stdlib.h \
-  ..\..\..\..\..\sdk\platform\core_modules\common\api\co_buf.h \
-  ..\..\..\..\..\sdk\platform\core_modules\common\api\co_list.h \
-  ..\..\..\..\..\sdk\ble_stack\controller\llm\llm_task.h \
-  ..\..\..\..\..\sdk\ble_stack\ea\api\ea.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_suotar.h \
+  ..\..\..\..\..\sdk\app_modules\api\app_adv_data.h ..\src\EPD_4in2.h \
+  ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
   ..\src\config\user_periph_setup.h \
   ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
-  ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
-  ..\src\config\user_callback_config.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_callback.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_entry_point.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_prf_types.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_bond_db.h ..\src\user_ota.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_task.h \
-  ..\..\..\..\..\sdk\app_modules\api\app.h ..\src\user_custs1_impl.h \
-  ..\..\..\..\..\sdk\ble_stack\profiles\custom\custs\api\custs1_task.h \
-  ..\..\..\..\..\sdk\ble_stack\host\att\attm\attm_db_128.h \
-  ..\..\..\..\..\sdk\platform\core_modules\arch_console\arch_console.h \
-  d:\Tools\Keil5\ARM\ARMCLANG\Bin\..\include\stdarg.h \
-  ..\..\..\..\..\sdk\app_modules\api\app_prf_perm_types.h
+  ..\src\Debug.h

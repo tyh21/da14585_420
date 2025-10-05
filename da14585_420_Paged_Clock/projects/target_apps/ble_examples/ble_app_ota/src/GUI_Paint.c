@@ -16,7 +16,7 @@
 *
 ******************************************************************************/
 #include "GUI_Paint.h"
-#include "EPD_2in13_V2.h" // <-- 引入这个文件来获取 EPD_WIDTH
+#include "EPD_4in2.h" // <-- 引入这个文件来获取 EPD_WIDTH
 #include "Debug.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -34,7 +34,7 @@ PAINT Paint;
 // == 1. 引入分页所需的支持 (核心修改)
 // ===================================================================
 #define PAGE_HEIGHT 32 // 内存安全的分页高度，可以根据需要调整
-#define MAX_PAGE_WIDTH_BYTES (EPD_2IN13_V2_WIDTH / 8)
+#define MAX_PAGE_WIDTH_BYTES (EPD_4IN2_V2WIDTH / 8)
 #define MAX_PAGE_BUFFER_SIZE (MAX_PAGE_WIDTH_BYTES * PAGE_HEIGHT)
 
 // 定义为全局可访问变量 (没有 static)，以便 display() 函数可以访问和设置

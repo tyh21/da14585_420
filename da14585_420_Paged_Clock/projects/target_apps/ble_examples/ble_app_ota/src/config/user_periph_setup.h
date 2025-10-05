@@ -26,7 +26,7 @@
 #include "spi_flash.h"
 #include "i2c.h"
 #include "i2c_eeprom.h"
-#include "EPD_2in13_V2.h"
+#include "EPD_4in2.h"
 
 
 /*

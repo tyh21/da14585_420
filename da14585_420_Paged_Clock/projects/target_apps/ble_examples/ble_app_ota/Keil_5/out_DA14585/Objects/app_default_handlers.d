@@ -129,7 +129,7 @@
   ..\..\..\..\..\sdk\app_modules\api\app_suotar.h \
   ..\..\..\..\..\sdk\app_modules\api\app_bond_db.h \
   ..\src\config\user_periph_setup.h \
-  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_2in13_V2.h \
+  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h ..\src\user_ota.h \
   ..\..\..\..\..\sdk\app_modules\api\app_task.h \
   ..\src\user_custs1_impl.h \

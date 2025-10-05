@@ -42,7 +42,7 @@
 #include "analog_clock.h"
 #include "co_bt.h"
 #include "ImageData.h"
-#include "EPD_2in13_V2.h"
+#include "EPD_4in2.h"
 
 /*
  * GLOBAL VARIABLE DEFINITIONS
@@ -91,8 +91,8 @@ img_header_t imgheader __SECTION_ZERO("retention_mem_area0");
 ke_msg_id_t timer_used __SECTION_ZERO("retention_mem_area0");      //@RETENTION MEMORY
 uint16_t indication_counter __SECTION_ZERO("retention_mem_area0"); //@RETENTION MEMORY
 uint16_t non_db_val_counter __SECTION_ZERO("retention_mem_area0"); //@RETENTION MEMORY
-//#define epd_buffer_size (EPD_2IN13_V2_WIDTH * EPD_2IN13_V2_HEIGHT / 8)
-#define buffer_size (EPD_2IN13_V2_WIDTH * EPD_2IN13_V2_HEIGHT / 4)
+//#define epd_buffer_size (EPD_4IN2_V2WIDTH * EPD_4IN2_V2HEIGHT / 8)
+#define buffer_size (EPD_4IN2_V2WIDTH * EPD_4IN2_V2HEIGHT / 4)
 uint32_t byte_pos __SECTION_ZERO("retention_mem_area0");
 //uint8_t epd_buffer[buffer_size] __SECTION_ZERO("retention_mem_area0");
 uint16_t index __SECTION_ZERO("retention_mem_area0");
@@ -197,7 +197,7 @@ void DisplayCustomImage(void)
     Paint_SelectImage(Image_Buffer);
     Paint_Clear(WHITE); // 清空为白色背景
     Paint_DrawBitMap(gImage_heavy_rain_32);
-    EPD_2IN13_V2_Display(Image_Buffer);
+    EPD_4IN2_V2Display(Image_Buffer);
 }
  
 
@@ -211,7 +211,7 @@ const UWORD img_x = 210; // 图片绘制的起始X坐标
 const UWORD img_y = 30;  // 图片绘制的起始Y坐标
 const UWORD img_w = 70;  // 图片宽度
 const UWORD img_h = 70;  // 图片高度
-Paint_NewImage(EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
+Paint_NewImage(EPD_4IN2_V2WIDTH, EPD_4IN2_V2HEIGHT, 270, WHITE);
 //            Paint_SelectImage(epd_buffer);
             //Paint_SetMirroring(MIRROR_VERTICAL);
             Paint_Clear(WHITE);
@@ -350,7 +350,7 @@ void do_time_show_diff_part(void)
 //            
 //        case DISPLAY_MODE_CALENDAR:
 //            // 原有的日历显示逻辑（数字时钟）
-//            Paint_NewImage(EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
+//            Paint_NewImage(EPD_4IN2_V2WIDTH, EPD_4IN2_V2HEIGHT, 270, WHITE);
 ////            Paint_SelectImage(epd_buffer);
 //            Paint_SetMirroring(MIRROR_VERTICAL);
 //            draw_calendar_page(current_unix_time);
@@ -358,7 +358,7 @@ void do_time_show_diff_part(void)
 //            
 //        case DISPLAY_MODE_CALENDAR_ANALOG:
 //            // 新的日历显示逻辑（模拟时钟）
-//            Paint_NewImage(EPD_2IN13_V2_WIDTH, EPD_2IN13_V2_HEIGHT, 270, WHITE);
+//            Paint_NewImage(EPD_4IN2_V2WIDTH, EPD_4IN2_V2HEIGHT, 270, WHITE);
 ////            Paint_SelectImage(epd_buffer);
 //            Paint_SetMirroring(MIRROR_VERTICAL);
 //            // 使用新的模拟时钟日历函数
@@ -603,17 +603,17 @@ void user_svc1_ctrl_wr_ind_handler(ke_msg_id_t const msgid,
 //        app_batt_lvl();
 //        arch_printf("epd_init\n");
 //        EPD_GPIO_init();
-//        EPD_2IN13_V2_Init(is_part);
+//        EPD_4IN2_V2Init(is_part);
 //        step++;
 //        break;
 //    case 2:
 //        if (is_part == 0)
 //        {
-//            EPD_2IN13_V2_DisplayPartBaseImage(epd_buffer);
+//            EPD_4IN2_V2DisplayPartBaseImage(epd_buffer);
 //        }
 //        else
 //        {
-//            EPD_2IN13_V2_DisplayPart(epd_buffer);
+//            EPD_4IN2_V2DisplayPart(epd_buffer);
 //        }
 
 //        step++;
@@ -622,11 +622,11 @@ void user_svc1_ctrl_wr_ind_handler(ke_msg_id_t const msgid,
 //        if (is_part == 0)
 //        {
 //            is_part = 1;
-//            EPD_2IN13_V2_TurnOnDisplay();
+//            EPD_4IN2_V2TurnOnDisplay();
 //        }
 //        else
 //        {
-//            EPD_2IN13_V2_TurnOnDisplayPart();
+//            EPD_4IN2_V2TurnOnDisplayPart();
 //        }
 
 //        step++;
@@ -638,7 +638,7 @@ void user_svc1_ctrl_wr_ind_handler(ke_msg_id_t const msgid,
 //            isbusy = 0;
 //            step = 0;
 //            arch_printf("epd_sleep\n");
-//            EPD_2IN13_V2_Sleep();
+//            EPD_4IN2_V2Sleep();
 //            out_buffer[0] = 0xff;
 //            out_buffer[1] = 0xff;
 //            bls_att_pushNotifyData(SVC1_IDX_LED_STATE_VAL, out_buffer, 2);
@@ -708,7 +708,7 @@ void display(void)
 						break; // 这里需要 break，不能直接进入下一步
         
         case 2: // 准备发送新图像数据 (命令 0x24)
-            EPD_2IN13_V2_SendCommand(0x24);
+            EPD_4IN2_V2SendCommand(0x24);
             step++;
             // 直接进入下一步
 
@@ -740,7 +740,7 @@ void display(void)
 							break;
 
         case 4: // 准备发送旧图像数据 (命令 0x26)
-            EPD_2IN13_V2_SendCommand(0x26);
+            EPD_4IN2_V2SendCommand(0x26);
             step++;
             // 直接进入下一步
 
@@ -763,7 +763,7 @@ void display(void)
         // 4. 发送数据
         uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
         //for (int i = 0; i < size_to_send; i++) {
-        //    EPD_2IN13_V2_SendData(page_buffer[i]);
+        //    EPD_4IN2_V2SendData(page_buffer[i]);
 				//			if (i % 256 == 0) {                               //喂狗
 				//				wdg_reload(WATCHDOG_DEFAULT_PERIOD);
 								//arch_ble_force_wakeup();
@@ -776,7 +776,7 @@ void display(void)
 				break;
 
         case 6: // 触发屏幕刷新
-            EPD_2IN13_V2_TurnOnDisplay(); // 全刷 (0xF7)
+            EPD_4IN2_V2TurnOnDisplay(); // 全刷 (0xF7)
         step++;
         break;
 
@@ -787,7 +787,7 @@ void display(void)
             break;
 
         case 8: // 进入休眠
-            EPD_2IN13_V2_Sleep();
+            EPD_4IN2_V2Sleep();
             out_buffer[0] = 0xff;
             out_buffer[1] = 0xff;
             bls_att_pushNotifyData(SVC1_IDX_LED_STATE_VAL, out_buffer, 2);

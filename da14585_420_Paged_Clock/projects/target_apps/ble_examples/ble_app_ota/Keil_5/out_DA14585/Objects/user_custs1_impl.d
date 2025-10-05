@@ -138,7 +138,7 @@
   ..\..\..\..\..\sdk\platform\core_modules\arch_console\arch_console.h \
   d:\Tools\Keil5\ARM\ARMCLANG\Bin\..\include\stdarg.h \
   ..\src\config\user_periph_setup.h \
-  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_2in13_V2.h \
+  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
   ..\src\config\user_callback_config.h \
   ..\..\..\..\..\sdk\app_modules\api\app_callback.h \
@@ -152,4 +152,4 @@
   ..\..\..\..\..\sdk\platform\driver\battery\battery.h ..\src\user_ota.h \
   ..\src\Fonts\fonts.h ..\src\GUI_Paint.h ..\src\Debug.h \
   ..\src\DEV_Config.h ..\src\lunar\lunar.h ..\src\DEV_Config.h \
-  ..\src\calendar_display.h ..\src\analog_clock.h ..\src\EPD_2in13_V2.h
+  ..\src\calendar_display.h ..\src\analog_clock.h ..\src\EPD_4in2.h

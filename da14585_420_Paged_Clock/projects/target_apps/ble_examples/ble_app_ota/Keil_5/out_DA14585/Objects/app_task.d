@@ -134,7 +134,7 @@
   ..\..\..\..\..\sdk\app_modules\api\app_prf_types.h \
   ..\..\..\..\..\sdk\app_modules\api\app_bond_db.h \
   ..\src\config\user_periph_setup.h \
-  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_2in13_V2.h \
+  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h ..\src\user_ota.h \
   ..\src\user_custs1_impl.h \
   ..\..\..\..\..\sdk\ble_stack\profiles\custom\custs\api\custs1_task.h \

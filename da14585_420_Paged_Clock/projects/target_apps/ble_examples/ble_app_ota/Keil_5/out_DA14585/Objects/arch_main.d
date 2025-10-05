@@ -129,7 +129,7 @@
   ..\..\..\..\..\sdk\platform\driver\ble\_reg_ble_em_cs.h \
   ..\..\..\..\..\sdk\platform\core_modules\ke\api\ke_event.h \
   ..\src\config\user_periph_setup.h \
-  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_2in13_V2.h \
+  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
   ..\..\..\..\..\sdk\platform\core_modules\rf\api\rf.h \
   ..\..\..\..\..\sdk\app_modules\api\app.h \

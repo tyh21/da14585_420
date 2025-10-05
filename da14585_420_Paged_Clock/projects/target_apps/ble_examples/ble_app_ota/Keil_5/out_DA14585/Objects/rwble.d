@@ -150,7 +150,7 @@
   ..\..\..\..\..\sdk\platform\system_library\include\system_library.h \
   ..\..\..\..\..\sdk\platform\driver\adc\adc.h \
   ..\..\..\..\..\sdk\platform\driver\adc\adc_58x.h \
-  ..\src\config\user_periph_setup.h ..\src\EPD_2in13_V2.h \
+  ..\src\config\user_periph_setup.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
   ..\..\..\..\..\sdk\platform\arch\main\arch_system.h \
   ..\..\..\..\..\sdk\ble_stack\controller\llc\llc_util.h \

@@ -111,9 +111,8 @@
   ..\..\..\..\..\sdk\app_modules\api\app_security.h \
   ..\..\..\..\..\sdk\app_modules\api\app_adv_data.h ..\src\GUI_Paint.h \
   ..\src\Debug.h ..\src\DEV_Config.h ..\src\Fonts\fonts.h \
-  ..\src\EPD_2in13_V2.h \
-  ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
+  ..\src\EPD_4in2.h ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
   ..\src\config\user_periph_setup.h \
-  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_2in13_V2.h \
+  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
   d:\Tools\Keil5\ARM\ARMCLANG\Bin\..\include\stdlib.h \
   d:\Tools\Keil5\ARM\ARMCLANG\Bin\..\include\math.h

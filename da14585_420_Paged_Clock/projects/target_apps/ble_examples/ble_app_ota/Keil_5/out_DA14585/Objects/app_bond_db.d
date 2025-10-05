@@ -115,5 +115,5 @@
   ..\..\..\..\..\sdk\platform\core_modules\rwip\api\rwip_config.h \
   ..\..\..\..\..\sdk\app_modules\api\app_bond_db.h \
   ..\src\config\user_periph_setup.h \
-  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_2in13_V2.h \
+  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h

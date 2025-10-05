@@ -118,7 +118,7 @@
   ..\..\..\..\..\sdk\platform\driver\hw_otpc\hw_otpc_58x.h \
   ..\..\..\..\..\sdk\platform\utilities\otp_hdr\otp_hdr.h \
   ..\src\config\user_periph_setup.h \
-  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_2in13_V2.h \
+  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
   ..\src\config\user_callback_config.h \
   ..\..\..\..\..\sdk\app_modules\api\app_callback.h \

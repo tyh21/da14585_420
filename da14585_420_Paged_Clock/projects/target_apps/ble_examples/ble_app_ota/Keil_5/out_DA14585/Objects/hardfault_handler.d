@@ -114,5 +114,5 @@
   ..\..\..\..\..\sdk\platform\driver\uart\uart.h \
   ..\..\..\..\..\sdk\platform\arch\main\arch_wdg.h \
   ..\..\..\..\..\sdk\platform\driver\syscntl\syscntl.h \
-  ..\src\config\user_periph_setup.h ..\src\EPD_2in13_V2.h \
+  ..\src\config\user_periph_setup.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h

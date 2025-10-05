@@ -114,7 +114,7 @@
   ..\..\..\..\..\sdk\app_modules\api\app_bass.h \
   ..\..\..\..\..\sdk\platform\driver\battery\battery.h \
   ..\src\config\user_periph_setup.h \
-  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_2in13_V2.h \
+  ..\..\..\..\..\sdk\platform\driver\uart\uart.h ..\src\EPD_4in2.h \
   ..\..\..\..\..\sdk\platform\driver\systick\systick.h \
   ..\..\..\..\..\sdk\app_modules\api\app_prf_perm_types.h \
   ..\..\..\..\..\sdk\app_modules\api\app.h
