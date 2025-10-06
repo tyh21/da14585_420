@@ -32,7 +32,7 @@
  ****************************************************************************************
  */
 
-#define     WATCHDOG_DEFAULT_PERIOD 0xC8
+#define     WATCHDOG_DEFAULT_PERIOD 0xFF
 
 /// Watchdog enable/disable
 #ifndef USE_WDOG
