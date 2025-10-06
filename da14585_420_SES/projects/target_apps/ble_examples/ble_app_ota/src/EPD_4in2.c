@@ -114,26 +114,24 @@ void EPD_4IN2_V2SendData(uint8_t sdbyte)
     EPD_CS_H;
 }
 
-void EPD_SendDataBlock(const uint8_t* data, uint16_t len)
+void EPD_SendDataBlock(const uint8_t* data, uint16_t len)    //ses专用
 {
-    // 1. 设置 D/C 引脚为高电平，告诉屏幕：“接下来是数据！”
-    //    这个函数只需要在发送数据块之前调用一次。
-    EPD_DC_H;
-
-    // 2. 拉低 CS 引脚，就像打开卡车的车门，准备开始“装货”。
-    //    这是整个“块传输”的开始信号。
-    EPD_CS_L;
-
-    // 3. 使用一个高效的 for 循环，连续不断地发送数据块中的每一个字节。
-    //    注意：我们在这里依然调用的是底层的、硬件驱动的 DEV_SPI_WriteByte，
-    //    我们没有去修改它，只是改变了调用它的方式。
+    // 遍历数据块中的每一个字节
     for (uint16_t i = 0; i < len; i++) {
-        DEV_SPI_WriteByte(data[i]);
+        // 对于每一个字节，都完整地执行一次“发送数据”的标准流程
+        
+        // 1. 设置 DC 为高电平 (数据模式)
+        EPD_DC_H;
+        
+        // 2. 拉低 CS，准备发送这一个字节
+        EPD_CS_L;
+        
+        // 3. 调用底层的 spi_access 发送当前这一个字节
+        spi_access(data[i]);
+        
+        // 4. 拉高 CS，结束这一个字节的发送
+        EPD_CS_H;
     }
-
-    // 4. 所有数据都发送完毕后，拉高 CS 引脚，就像关上卡车的车门，告诉屏幕：“装货完毕！”
-    //    这是整个“块传输”的结束信号。
-    EPD_CS_H;
 }
 
 /******************************************************************************
@@ -160,7 +158,7 @@ parameter:
 {
     EPD_4IN2_V2SendCommand(0x12); // SES 的刷新命令
     DEV_Delay_ms(100);
-    EPD_4IN2_V2ReadBusy();
+    //EPD_4IN2_V2ReadBusy();
 }
 
  void EPD_4IN2_V2TurnOnDisplay_RED(void)
@@ -484,39 +482,39 @@ void EPD_Init(void)
     EPD_4IN2_V2SendData(0x0F);    // LUT from OTP
 }
 
-void EPD_4IN2_V2Init_Partial_Mode_Legacy(void)
-{
-    // 我们不需要完整的 Reset 和 Init，只需要切换模式的关键指令
+//void EPD_4IN2_V2Init_Partial_Mode_Legacy(void)
+//{
+//    // 我们不需要完整的 Reset 和 Init，只需要切换模式的关键指令
 
-    // 1. 设置VCOM电压 (来自旧驱动)
-    EPD_4IN2_V2SendCommand(0x2C);
-    EPD_4IN2_V2SendData(0x28); // 使用旧驱动中的值
+//    // 1. 设置VCOM电压 (来自旧驱动)
+//    EPD_4IN2_V2SendCommand(0x2C);
+//    EPD_4IN2_V2SendData(0x28); // 使用旧驱动中的值
 
-    EPD_4IN2_V2ReadBusy();
+//    EPD_4IN2_V2ReadBusy();
 
-    // 2. 【核心】加载局刷LUT (来自旧驱动)
-    // 注意：这里的 EPD_4IN2_V2lut_partial_update 数组必须存在于您的项目中！
-    EPD_4IN2_V2SendCommand(0x32);
-    for (int count = 0; count < 70; count++)
-    {
-        EPD_4IN2_V2SendData(EPD_4IN2_V2lut_partial_update[count]);
-    }
+//    // 2. 【核心】加载局刷LUT (来自旧驱动)
+//    // 注意：这里的 EPD_4IN2_V2lut_partial_update 数组必须存在于您的项目中！
+//    EPD_4IN2_V2SendCommand(0x32);
+//    for (int count = 0; count < 70; count++)
+//    {
+//        EPD_4IN2_V2SendData(EPD_4IN2_V2lut_partial_update[count]);
+//    }
 
-    // 3. 发送神秘的 0x37 指令序列 (来自旧驱动)
-    EPD_4IN2_V2SendCommand(0x37);
-    EPD_4IN2_V2SendData(0x00);
-    EPD_4IN2_V2SendData(0x00);
-    EPD_4IN2_V2SendData(0x00);
-    EPD_4IN2_V2SendData(0x00);
-    EPD_4IN2_V2SendData(0x40);
-    EPD_4IN2_V2SendData(0x00);
-    EPD_4IN2_V2SendData(0x00);
-}
+//    // 3. 发送神秘的 0x37 指令序列 (来自旧驱动)
+//    EPD_4IN2_V2SendCommand(0x37);
+//    EPD_4IN2_V2SendData(0x00);
+//    EPD_4IN2_V2SendData(0x00);
+//    EPD_4IN2_V2SendData(0x00);
+//    EPD_4IN2_V2SendData(0x00);
+//    EPD_4IN2_V2SendData(0x40);
+//    EPD_4IN2_V2SendData(0x00);
+//    EPD_4IN2_V2SendData(0x00);
+//}
 
-void EPD_4IN2_V2TurnOnDisplay_Partial_Legacy(void)
-{
-    EPD_4IN2_V2SendCommand(0x22);
-    EPD_4IN2_V2SendData(0xC0); // <-- 使用旧驱动的参数
-    EPD_4IN2_V2SendCommand(0x20);
-    EPD_4IN2_V2ReadBusy();
-}
+//void EPD_4IN2_V2TurnOnDisplay_Partial_Legacy(void)
+//{
+//    EPD_4IN2_V2SendCommand(0x22);
+//    EPD_4IN2_V2SendData(0xC0); // <-- 使用旧驱动的参数
+//    EPD_4IN2_V2SendCommand(0x20);
+//    EPD_4IN2_V2ReadBusy();
+//}

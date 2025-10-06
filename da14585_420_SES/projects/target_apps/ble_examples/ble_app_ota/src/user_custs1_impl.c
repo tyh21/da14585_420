@@ -536,13 +536,13 @@ void display(void)
             break;
 
         case 1: // 初始化
-            EPD_Init();     //微雪驱动，可以飞刷
+            EPD_Init();     //微雪驱动，可以点亮ses
 						page_to_render = 0;
 						step++;
 						break; // 这里需要 break，不能直接进入下一步
         
-        case 2: // 准备发送新图像数据 (命令 0x24)
-            EPD_4IN2_V2SendCommand(0x24);
+        case 2: // 准备发送新图像数据 (ses命令为0x10)
+            EPD_4IN2_V2SendCommand(0x10);
             step++;
             // 直接进入下一步
 
@@ -573,8 +573,8 @@ void display(void)
 							}
 							break;
 
-        case 4: // 准备发送旧图像数据 (命令 0x26)
-            EPD_4IN2_V2SendCommand(0x26);
+        case 4: // 准备发送旧图像数据 (ses发送红色命令 0x13)
+            EPD_4IN2_V2SendCommand(0x13);
             step++;
             // 直接进入下一步
 
@@ -591,8 +591,8 @@ void display(void)
         }
 
         // 2. 初始化 Paint 库 (这一步在两个分支中都需要)
-        Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
-        Paint_Clear(WHITE); // 用白色清空缓冲区
+        Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, RED);
+        Paint_Clear(RED); // 用白色清空缓冲区
             do_old_display_update_with_analog_clock();
         // 4. 发送数据
         uint32_t size_to_send = (LOGIC_WIDTH * current_page_actual_height) / 8;
@@ -610,7 +610,7 @@ void display(void)
 				break;
 
         case 6: // 触发屏幕刷新
-            EPD_4IN2_V2TurnOnDisplay(); // 全刷 (0xF7)
+            EPD_4IN2_V2TurnOnDisplay(); // 全刷 (ses命令0x12)
         step++;
         break;
 
