@@ -386,20 +386,6 @@ void do_img_save(void)
         int8_t status = spi_flash_read_data(buf, IMG_HEADER_ADDRESS, sizeof(img_header_t), &actual_size);
         arch_printf("status0:%d\n", status);
         imgheadertmp = (img_header_t *)buf;
-        // if (imgheadertmp->CRC != imgheader.CRC)
-        // {
-        // status=spi_flash_block_erase(IMG_HEADER_ADDRESS, SPI_FLASH_OP_BE32);
-        // arch_printf("status1:%d\n",status);
-        // arch_printf("erase\n");
-        // status=spi_flash_set_write_enable();
-        // arch_printf("status4s:%d\n",status);
-        // status=spi_flash_write_data((uint8_t *)&imgheader, IMG_HEADER_ADDRESS, sizeof(img_header_t), &actual_size);
-        // arch_printf("status2:%d\n",status);
-        // arch_printf("imgheader wr:%d\n", actual_size);
-        // status=spi_flash_write_data(epd_buffer, IMG_HEADER_ADDRESS + sizeof(img_header_t), sizeof(epd_buffer), &actual_size);
-        // arch_printf("status3:%d\n",status);
-        // arch_printf("epd_buffer wr:%d size:%d\n", actual_size,sizeof(epd_buffer));
-        // }
         spi_flash_ultra_deep_power_down();
     }
 }
@@ -409,35 +395,7 @@ void do_min_work_with_analog_clock(void)
     timer_used_min = app_easy_timer(APP_PERIPHERAL_CTRL_TIMER_DELAY_MINUTES, do_min_work_with_analog_clock);    // 1. 设置下一次的 60 秒定时器
     current_unix_time += time_offset;                           //更新当前的 Unix 时间戳
     time_offset = 60;
-    // a. 计算 tm_t 结构体
-//    transformTime(current_unix_time, &g_tm);
-
-//    // ================== 【核心修改】使用中文转换 ==================
-//    
-//    // a. 定义临时的中文字符串缓冲区
-//    char chinese_year[20];
-//    char chinese_month[10];
-//    char chinese_day[10];
-
-//    // b. 调用转换函数
-//    year_to_chinese(g_tm.tm_year + YEAR0, chinese_year);
-//    num_to_chinese(g_tm.tm_mon + 1, chinese_month);
-//    num_to_chinese(g_tm.tm_mday, chinese_day);
-
-//    // c. 格式化最终的全局日期字符串
-//		sprintf(date_str, "%d-%02d-%02d", g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-//    sprintf(date_str_CN, "%s年%s月%s日", chinese_year, chinese_month, chinese_day);
-
-//    // (时间和农历的计算保持不变)
-//    sprintf(time_str, "%02d:%02d", g_tm.tm_hour, g_tm.tm_min);
-//    
-//    struct Lunar_Date lunar_date;
-//    LUNAR_SolarToLunar(&lunar_date, g_tm.tm_year + YEAR0, g_tm.tm_mon + 1, g_tm.tm_mday);
-//    sprintf(lunar_str, "%s%s  星期%s", 
-//            Lunar_MonthString[lunar_date.Month], 
-//            Lunar_DateString[lunar_date.Date],
-//            WEEKCN[g_tm.tm_wday]);
-    // ====================================================================
+   // ====================================================================
 			update_all_display_strings(); 
     // 4. 如果当前没有正在进行的显示任务，就启动一次新的显示
     if (step == 0)
@@ -495,15 +453,6 @@ void user_svc1_ctrl_wr_ind_handler(ke_msg_id_t const msgid,
         }
     }
 }
-
-// =================== display 函数 (最终内存安全版) ===================
-/******************************************************************************
-* | Function    :   display (Final Paged Version)
-* | Author      :   Manus
-* | Info        :
-*   This function implements a memory-safe, paged rendering workflow.
-*   It automatically handles coordinate and mirroring corrections.
-******************************************************************************/
 
 // 确保这些全局变量在 display() 函数能访问到的地方声明
 // (通常在 display() 函数所在文件的顶部，或者一个共享的头文件中)
@@ -623,7 +572,7 @@ void display(void)
             break;
 
         case 8: // 进入休眠
-            EPD_4IN2_V2Sleep();
+            //EPD_4IN2_V2Sleep();
             out_buffer[0] = 0xff;
             out_buffer[1] = 0xff;
             bls_att_pushNotifyData(SVC1_IDX_LED_STATE_VAL, out_buffer, 2);

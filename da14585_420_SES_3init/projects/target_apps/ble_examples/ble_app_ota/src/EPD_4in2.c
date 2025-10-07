@@ -466,7 +466,7 @@ void EPD_4IN2_V2Sleep(void)
     EPD_4IN2_V2SendCommand(0x07); // DEEP_SLEEP
     EPD_4IN2_V2SendData(0XA5);
 }
-/*
+
 void EPD_Init(void)                 //睡不醒驱动
 {
     EPD_4IN2_V2Reset();
@@ -487,59 +487,58 @@ void EPD_Init(void)                 //睡不醒驱动
     EPD_4IN2_V2SendCommand(0x50);
     EPD_4IN2_V2SendData(0x97);
 }
-*/
 
-void EPD_Init(void)           //cc2510驱动
-{
-    // 复位操作，保持不变
-    EPD_4IN2_V2Reset();
+//void EPD_Init(void)           //cc2510驱动         黑屏，需修改颜色参数，黑白定义与其他相反
+//{
+//    // 复位操作，保持不变
+//    EPD_4IN2_V2Reset();
 
-    // --- 开始复刻 CC2510 的命令 ---
+//    // --- 开始复刻 CC2510 的命令 ---
 
-    // 1. Boost Soft Start (Command 0x06)
-    EPD_4IN2_V2SendCommand(0x06);
-    EPD_4IN2_V2SendData(0x17);
-    EPD_4IN2_V2SendData(0x17);
-    EPD_4IN2_V2SendData(0x17);
+//    // 1. Boost Soft Start (Command 0x06)
+//    EPD_4IN2_V2SendCommand(0x06);
+//    EPD_4IN2_V2SendData(0x17);
+//    EPD_4IN2_V2SendData(0x17);
+//    EPD_4IN2_V2SendData(0x17);
 
-    // 2. Power On (Command 0x04)
-    EPD_4IN2_V2SendCommand(0x04);
-    EPD_4IN2_V2ReadBusy();
+//    // 2. Power On (Command 0x04)
+//    EPD_4IN2_V2SendCommand(0x04);
+//    EPD_4IN2_V2ReadBusy();
 
-    // 3. Panel Setting (Command 0x00) - 使用 0x0f
-    EPD_4IN2_V2SendCommand(0x00);
-    EPD_4IN2_V2SendData(0x0f); // 【关键】使用 'LUT from OTP' 的设置
-    EPD_4IN2_V2SendData(0x0d); // 【关键】补上第二个参数
+//    // 3. Panel Setting (Command 0x00) - 使用 0x0f
+//    EPD_4IN2_V2SendCommand(0x00);
+//    EPD_4IN2_V2SendData(0x0f); // 【关键】使用 'LUT from OTP' 的设置
+//    EPD_4IN2_V2SendData(0x0d); // 【关键】补上第二个参数
 
-    // 4. VCOM and Data Interval Setting (Command 0x50) - 使用 0x77
-    EPD_4IN2_V2SendCommand(0x50);
-    EPD_4IN2_V2SendData(0x77); // 【关键】使用 CC2510 版本的参数
-}
+//    // 4. VCOM and Data Interval Setting (Command 0x50) - 使用 0x77
+//    EPD_4IN2_V2SendCommand(0x50);
+//    EPD_4IN2_V2SendData(0x77); // 【关键】使用 CC2510 版本的参数
+//}
 
-void EPD_Init(void)      // 微雪的 Init 函数
-{
-    // 1. 复位 (与官方一致)
-    EPD_4IN2_V2Reset();
+//void EPD_Init(void)      // 微雪的 Init 函数
+//{
+//    // 1. 复位 (与官方一致)
+//    EPD_4IN2_V2Reset();
 
-    // --- 开始复刻微雪官方的命令序列 ---
+//    // --- 开始复刻微雪官方的命令序列 ---
 
-    // 2. Boost Soft Start (Command 0x06)
-    // 这是官方驱动的第一步核心指令
-    EPD_4IN2_V2SendCommand(0x06);
-    EPD_4IN2_V2SendData(0x17);
-    EPD_4IN2_V2SendData(0x17);
-    EPD_4IN2_V2SendData(0x17);
+//    // 2. Boost Soft Start (Command 0x06)
+//    // 这是官方驱动的第一步核心指令
+//    EPD_4IN2_V2SendCommand(0x06);
+//    EPD_4IN2_V2SendData(0x17);
+//    EPD_4IN2_V2SendData(0x17);
+//    EPD_4IN2_V2SendData(0x17);
 
-    // 3. Power On (Command 0x04)
-    // 这是官方驱动的第二步核心指令
-    EPD_4IN2_V2SendCommand(0x04);
-    EPD_4IN2_V2ReadBusy();
+//    // 3. Power On (Command 0x04)
+//    // 这是官方驱动的第二步核心指令
+//    EPD_4IN2_V2SendCommand(0x04);
+//    EPD_4IN2_V2ReadBusy();
 
-    // 4. Panel Setting (Command 0x00)
-    // 这是官方驱动的第三步核心指令
-    EPD_4IN2_V2SendCommand(0x00);
-    EPD_4IN2_V2SendData(0x0F); // 使用官方的 0x0F 参数，表示 "LUT from OTP"
+//    // 4. Panel Setting (Command 0x00)
+//    // 这是官方驱动的第三步核心指令
+//    EPD_4IN2_V2SendCommand(0x00);
+//    EPD_4IN2_V2SendData(0x0F); // 使用官方的 0x0F 参数，表示 "LUT from OTP"
 
-    // 5. 结束
-    // 官方的 EPD_4IN2BC_Init 函数到这里就结束了，没有其他命令了。
-}
+//    // 5. 结束
+//    // 官方的 EPD_4IN2BC_Init 函数到这里就结束了，没有其他命令了。
+//}
