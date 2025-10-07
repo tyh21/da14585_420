@@ -470,16 +470,21 @@ void EPD_Init(void)
 {
     EPD_4IN2_V2Reset();
 
-    EPD_4IN2_V2SendCommand(0x06); // BOOSTER_SOFT_START
-    EPD_4IN2_V2SendData(0x17);
-    EPD_4IN2_V2SendData(0x17);
-    EPD_4IN2_V2SendData(0x17);
-    
-    EPD_4IN2_V2SendCommand(0x04); // POWER_ON
-    EPD_4IN2_V2ReadBusy();
-    
-    EPD_4IN2_V2SendCommand(0x00); // PANEL_SETTING
-    EPD_4IN2_V2SendData(0x0F);    // LUT from OTP
+    // Step 2: Power On (Command 0x04)
+    // This is the logic from the new file's EPD_init()
+    EPD_4IN2_V2SendCommand(0x04);
+    EPD_4IN2_V2ReadBusy(); // Wait for the operation to complete
+
+    // Step 3: Panel Setting (Command 0x00)
+    // This is the first key difference.
+    EPD_4IN2_V2SendCommand(0x00);
+    EPD_4IN2_V2SendData(0x1F); // Use 0x1F instead of 0x0F
+
+    // Step 4: VCOM and Data Interval Setting (Command 0x50)
+    // This is the second key difference. This command was not present
+    // in the global refresh init sequence.
+    EPD_4IN2_V2SendCommand(0x50);
+    EPD_4IN2_V2SendData(0x97);
 }
 
 //void EPD_4IN2_V2Init_Partial_Mode_Legacy(void)

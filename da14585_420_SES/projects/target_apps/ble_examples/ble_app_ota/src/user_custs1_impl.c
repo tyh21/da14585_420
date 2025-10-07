@@ -319,13 +319,13 @@ void do_display_update_with_analog_clock(void)
     // 这个函数现在不进行任何计算，只负责绘图
 
     // 1. 在第 10 行，写公历日期 (从全局变量读取)
-    EPD_DrawUTF8(10, 10, 1, date_str_CN, EPD_ASCII_11X16, EPD_FontUTF8_16x16, WHITE, WHITE);
+    EPD_DrawUTF8(10, 10, 1, date_str_CN, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
 
     // 2. 在第 50 行，写时间 (从全局变量读取)
-    Paint_DrawBigNumberString(0, 80, time_str, WHITE);
+    Paint_DrawBigNumberString(0, 80, time_str, BLACK);
 	
     // 3. 在第 260 行，写农历和星期 (从全局变量读取)
-    EPD_DrawUTF8(10, 260, 1, lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, WHITE, WHITE);
+    EPD_DrawUTF8(10, 260, 1, lunar_str, EPD_ASCII_11X16, EPD_FontUTF8_16x16, BLACK, WHITE);
 }
 
 void do_old_display_update_with_analog_clock(void)
@@ -557,9 +557,9 @@ void display(void)
                     current_page_actual_height = LOGIC_HEIGHT - current_page_y_start; // 最后一页的高度
                 }
                 // 2. 初始化 Paint 库
-                Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, BLACK);
+                Paint_NewImage(LOGIC_WIDTH, LOGIC_HEIGHT, ROTATE_0, WHITE);
                 // 3. 清空当前页的缓冲区
-                Paint_Clear(BLACK);
+                Paint_Clear(WHITE);
                 // 4. 【绘图区】调用上层绘图逻辑
                 do_display_update_with_analog_clock(); // <--- 我们把绘图逻辑放回这里
                 // 5. 发送数据
